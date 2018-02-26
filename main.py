@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 from data.camvid import CamVidDataset, LabelTensorToPIL
 from models.enet import ENet
 from train import Train
+from val import Validation
+from metrics.iou import IoU
 from utils import imshow_batch
 
 # TODO: Convert variables below into command-line arguments using argparse
@@ -26,6 +28,13 @@ trainset = CamVidDataset('data/CamVid/', transform=transforms.ToTensor())
 # Split it into minibatches of 4, shuffle, and set the no. of workers
 trainloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True,
                               num_workers=num_workers)
+
+# Load the validation set as tensors
+valset = CamVidDataset('data/CamVid/', mode='val',
+                       transform=transforms.ToTensor())
+# Split it into minibatches of 4, shuffle, and set the no. of workers
+valloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True,
+                            num_workers=num_workers)
 
 # Initialize the label to PIL class
 to_pil = LabelTensorToPIL()
@@ -57,9 +66,11 @@ print(net)
 criterion = nn.CrossEntropyLoss()
 
 # ENet authors used mini-batch gradient descent
-
 optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum,
                       weight_decay=weight_decay)
+
+# Evaluation metrics
+metrics = IoU(num_classes)
 
 if use_cuda:
     net = net.cuda()
@@ -67,11 +78,20 @@ if use_cuda:
 
 # Start Training
 train = Train(net, trainloader, optimizer, criterion, use_cuda)
+val = Validation(net, valloader, criterion, metrics, use_cuda)
 for epoch in range(num_epochs):
-    print("\n>>>> [Epoch: %d]" % epoch)
+    print("\n>>>> [Epoch: %d] Training" % epoch)
 
     epoch_loss = train.run_epoch()
 
     print(">>>> [Epoch: %d] Avg. loss: %.4f" % (epoch, epoch_loss))
+
+    if (epoch + 1) % 10 == 0:
+        print(">>>> [Epoch: %d] Validation" % epoch)
+
+        loss, iou, miou = val.run_epoch()
+
+        print(">>>> [Epoch: %d] Avg. loss: %.4f | Mean IoU: %.4f" %
+              (epoch, epoch_loss, miou))
 
 print("Finished training!")
