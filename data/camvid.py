@@ -26,8 +26,8 @@ class LabelPILToTensor(object):
 
         """
         if not isinstance(pic, Image.Image):
-            raise TypeError(
-                "pic should be PIL Image. Got {}".format(type(pic)))
+            raise TypeError("pic should be PIL Image. Got {}".format(
+                type(pic)))
 
         # handle numpy array
         if isinstance(pic, np.ndarray):
@@ -36,15 +36,15 @@ class LabelPILToTensor(object):
             return img.long()
 
         # Convert PIL image to ByteTensor
-        img = torch.ByteTensor(
-            torch.ByteStorage.from_buffer(pic.tobytes()))
+        img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))
 
         # Reshape tensor
         nchannel = len(pic.mode)
         img = img.view(pic.size[1], pic.size[0], nchannel)
 
         # Convert to long and squeeze the channels
-        return img.transpose(0, 1).transpose(0, 2).contiguous().long().squeeze_()
+        return img.transpose(0, 1).transpose(0,
+                                             2).contiguous().long().squeeze_()
 
 
 class LabelTensorToPIL(object):
@@ -84,18 +84,18 @@ class LabelTensorToPIL(object):
         # dictionary is ordered so we can assume that the index of the
         # (key,value) pair is the same as the class number
         label_to_color = OrderedDict([('sky', (128, 128, 128)),
-                                      ('building', (128, 0, 0)),
-                                      ('pole', (192, 192, 128)),
-                                      ('road_marking', (255, 69, 0)),
-                                      ('road', (128, 64, 128)),
-                                      ('pavement', (60, 40, 222)),
-                                      ('tree', (128, 128, 0)),
-                                      ('sign_symbol', (192, 128, 128)),
-                                      ('fence', (64, 64, 128)),
-                                      ('car', (64, 0, 128)),
-                                      ('pedestrian', (64, 64, 0)),
-                                      ('bicyclist', (0, 128, 192)),
-                                      ('unlabelled', (0, 0, 0))])
+                              ('building', (128, 0, 0)),
+                              ('pole', (192, 192, 128)),
+                              ('road_marking', (255, 69, 0)),
+                              ('road', (128, 64, 128)),
+                              ('pavement', (60, 40, 222)),
+                              ('tree', (128, 128, 0)),
+                              ('sign_symbol', (192, 128, 128)),
+                              ('fence', (64, 64, 128)),
+                              ('car', (64, 0, 128)),
+                              ('pedestrian', (64, 64, 0)),
+                              ('bicyclist', (0, 128, 192)),
+                              ('unlabelled', (0, 0, 0))])
 
         return label_to_color
 
@@ -132,8 +132,8 @@ class LabelTensorToPIL(object):
         if len(label_tensor.size()) == 2:
             label_tensor.unsqueeze_(0)
 
-        color_tensor = torch.Tensor(
-            3, label_tensor.size(1), label_tensor.size(2))
+        color_tensor = torch.Tensor(3, label_tensor.size(1),
+                                    label_tensor.size(2))
 
         for index, (class_name, color) in enumerate(label_to_color.items()):
             # Get a mask of elements equal to index
@@ -190,10 +190,10 @@ class CamVidDataset(data.Dataset):
 
     Keyword arguments:
     - root_dir (``string``): Root directory path.
-    - mode (``string``): The type of dataset: 'train' for training set, 'val' for
-    validation set, and 'test' for test set.
-    - transform (``callable``, optional): A function/transform that  takes in an
-    PIL image and returns a transformed version. E.g, ``transforms.RandomCrop``.
+    - mode (``string``): The type of dataset: 'train' for training set, 'val'
+    for validation set, and 'test' for test set.
+    - transform (``callable``, optional): A function/transform that  takes in
+    an PIL image and returns a transformed version. E.g, ``transforms.RandomCrop``.
     - label_transform (``callable``, optional): A function/transform that takes
     in the target and transforms it. Default: ``ToLongTensor``.
     - loader (``callable``, optional): A function to load an image given its
@@ -212,8 +212,12 @@ class CamVidDataset(data.Dataset):
     test_folder = 'test'
     test_lbl_folder = 'testannot'
 
-    def __init__(self, root_dir, mode='train', transform=None,
-                 label_transform=LabelPILToTensor(), loader=default_loader):
+    def __init__(self,
+                 root_dir,
+                 mode='train',
+                 transform=None,
+                 label_transform=LabelPILToTensor(),
+                 loader=default_loader):
         self.root_dir = root_dir
         self.mode = mode
         self.transform = transform
@@ -222,22 +226,22 @@ class CamVidDataset(data.Dataset):
 
         if self.mode == 'train':
             # Get the training data and labels filepaths
-            self.train_data = get_files(os.path.join
-                                        (root_dir, self.train_folder), '.png')
-            self.train_labels = get_files(os.path.join
-                                          (root_dir, self.train_lbl_folder), '.png')
+            self.train_data = get_files(
+                os.path.join(root_dir, self.train_folder), '.png')
+            self.train_labels = get_files(
+                os.path.join(root_dir, self.train_lbl_folder), '.png')
         elif self.mode == 'val':
             # Get the validation data and labels filepaths
-            self.val_data = get_files(os.path.join(
-                root_dir, self.val_folder), '.png')
-            self.val_labels = get_files(os.path.join(
-                root_dir, self.val_lbl_folder), '.png')
+            self.val_data = get_files(
+                os.path.join(root_dir, self.val_folder), '.png')
+            self.val_labels = get_files(
+                os.path.join(root_dir, self.val_lbl_folder), '.png')
         elif self.mode == 'test':
             # Get the test data and labels filepaths
-            self.test_data = get_files(os.path.join(
-                root_dir, self.test_folder), '.png')
-            self.test_labels = get_files(os.path.join(
-                root_dir, self.test_lbl_folder), '.png')
+            self.test_data = get_files(
+                os.path.join(root_dir, self.test_folder), '.png')
+            self.test_labels = get_files(
+                os.path.join(root_dir, self.test_lbl_folder), '.png')
         else:
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")
@@ -253,11 +257,14 @@ class CamVidDataset(data.Dataset):
 
         """
         if self.mode == 'train':
-            data_path, label_path = self.train_data[index], self.train_labels[index]
+            data_path, label_path = self.train_data[index], self.train_labels[
+                index]
         elif self.mode == 'val':
-            data_path, label_path = self.val_data[index], self.val_labels[index]
+            data_path, label_path = self.val_data[index], self.val_labels[
+                index]
         elif self.mode == 'test':
-            data_path, label_path = self.test_data[index], self.test_labels[index]
+            data_path, label_path = self.test_data[index], self.test_labels[
+                index]
         else:
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")

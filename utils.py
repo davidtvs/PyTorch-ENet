@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 
 def imshow_batch(images, labels):
-    """Displays two grids of images. The top grid displays ``images`` and the
-    bottom grid ``labels``
+    """Displays two grids of images. The top grid displays ``images``
+    and the bottom grid ``labels``
 
     Keyword arguments:
     - images (``Tensor``): a 4D mini-batch tensor of shape

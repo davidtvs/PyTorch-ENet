@@ -37,13 +37,13 @@ class MultiLabelConfusionMeter():
 
         """
         # If target and/or predicted are tensors, convert them to numpy arrays
-        if isinstance(predicted, (torch.FloatTensor, torch.DoubleTensor,
-                                  torch.ShortTensor, torch.IntTensor,
-                                  torch.LongTensor)):
+        if isinstance(predicted,
+                      (torch.FloatTensor, torch.DoubleTensor,
+                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
             predicted = predicted.numpy()
-        if isinstance(target, (torch.FloatTensor, torch.DoubleTensor,
-                               torch.ShortTensor, torch.IntTensor,
-                               torch.LongTensor)):
+        if isinstance(target,
+                      (torch.FloatTensor, torch.DoubleTensor,
+                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
             target = target.numpy()
 
         assert np.ndim(target) == 3 or np.ndim(target) == 4, \

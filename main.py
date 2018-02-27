@@ -26,15 +26,15 @@ use_cuda = True and torch.cuda.is_available()
 # Load the training set as tensors
 trainset = CamVidDataset('data/CamVid/', transform=transforms.ToTensor())
 # Split it into minibatches of 4, shuffle, and set the no. of workers
-trainloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers)
+trainloader = data.DataLoader(
+    trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 # Load the validation set as tensors
-valset = CamVidDataset('data/CamVid/', mode='val',
-                       transform=transforms.ToTensor())
+valset = CamVidDataset(
+    'data/CamVid/', mode='val', transform=transforms.ToTensor())
 # Split it into minibatches of 4, shuffle, and set the no. of workers
-valloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True,
-                            num_workers=num_workers)
+valloader = data.DataLoader(
+    trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
 # Initialize the label to PIL class
 to_pil = LabelTensorToPIL()
@@ -61,13 +61,16 @@ net = ENet(num_classes)
 print(net)
 
 # We are going to use the CrossEntropyLoss loss function as it's most
-# frequentely used in classification problems with multiple classes which fits
-# the problem. This criterion  combines LogSoftMax and NLLLoss.
+# frequentely used in classification problems with multiple classes which
+# fits the problem. This criterion  combines LogSoftMax and NLLLoss.
 criterion = nn.CrossEntropyLoss()
 
 # ENet authors used mini-batch gradient descent
-optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum,
-                      weight_decay=weight_decay)
+optimizer = optim.SGD(
+    net.parameters(),
+    lr=learning_rate,
+    momentum=momentum,
+    weight_decay=weight_decay)
 
 # Evaluation metrics
 metrics = IoU(num_classes)

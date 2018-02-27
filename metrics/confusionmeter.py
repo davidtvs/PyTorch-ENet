@@ -38,13 +38,13 @@ class ConfusionMeter():
 
         """
         # If target and/or predicted are tensors, convert them to numpy arrays
-        if isinstance(predicted, (torch.FloatTensor, torch.DoubleTensor,
-                                  torch.ShortTensor, torch.IntTensor,
-                                  torch.LongTensor)):
+        if isinstance(predicted,
+                      (torch.FloatTensor, torch.DoubleTensor,
+                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
             predicted = predicted.numpy()
-        if isinstance(target, (torch.FloatTensor, torch.DoubleTensor,
-                               torch.ShortTensor, torch.IntTensor,
-                               torch.LongTensor)):
+        if isinstance(target,
+                      (torch.FloatTensor, torch.DoubleTensor,
+                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
             target = target.numpy()
 
         assert predicted.shape[0] == target.shape[0], \
@@ -73,9 +73,8 @@ class ConfusionMeter():
 
         # hack for bincounting 2 arrays together
         x = predicted + self.k * target
-        bincount_2d = np.bincount(x.astype(np.int32),
-                                  minlength=self.k ** 2)
-        assert bincount_2d.size == self.k ** 2
+        bincount_2d = np.bincount(x.astype(np.int32), minlength=self.k**2)
+        assert bincount_2d.size == self.k**2
         conf = bincount_2d.reshape((self.k, self.k))
 
         self.conf += conf
