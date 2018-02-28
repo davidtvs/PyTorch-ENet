@@ -12,6 +12,7 @@ def imshow_batch(images, labels):
     (B, C, H, W)
     - labels (``Tensor``): a 4D mini-batch tensor of shape
     (B, C, H, W)
+
     """
 
     print(images.size(), labels.size())
@@ -24,3 +25,35 @@ def imshow_batch(images, labels):
     ax2.imshow(np.transpose(labels, (1, 2, 0)))
 
     plt.show()
+
+
+def enet_weighing(dataset, c=1.02):
+    """Computes class weights as described in the ENet paper:
+
+    w_class = 1 / (ln(c + p_class)),
+
+    where c is usually 1.02 and p_class is the propensity score of that
+    class:
+
+        propensity_score = freq_class / total_pixels.
+
+    References: https://arxiv.org/abs/1606.02147
+
+    """
+    freq = 0
+    total = 0
+    for _, label in dataset:
+        label = label.cpu().numpy()
+
+        # Flatten image
+        flat_label = np.reshape(label, -1)
+
+        # Sum up the class frequencies and pixel counts for each label
+        freq += np.bincount(flat_label)
+        total += flat_label.size
+
+    # Compute propensity score and then the weights for each class
+    propensity_score = freq / total
+    class_weights = 1 / (np.log(c + propensity_score))
+
+    return class_weights

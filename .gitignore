@@ -105,5 +105,5 @@ venv.bak/
 .mypy_cache/
 
 # Sublime text project
-.sublime-workspace
-.sublime-project
+*.sublime-workspace
+*.sublime-project

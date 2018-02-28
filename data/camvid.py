@@ -79,6 +79,7 @@ class LabelTensorToPIL(object):
             value, class names and class colors. The dictionary can be
             customized and passed to ``__call__`` through
             ``encoding``.
+
         """
         # Build the relationship between class number, name and color. The
         # dictionary is ordered so we can assume that the index of the
@@ -110,6 +111,7 @@ class LabelTensorToPIL(object):
 
         Returns:
         A ``PIL.Image``.
+
         """
         # Check if label_tensor is a LongTensor
         if not isinstance(label_tensor, torch.LongTensor):
