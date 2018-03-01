@@ -9,6 +9,7 @@ class IoU():
     Intersection over union (IoU) is a common evaluation metric for semantic
     segmentation. The predictions are first accumulated in a confusion matrix
     and the IoU is computed from it as follows:
+
         IoU = true_positive / (true_positive + false_positive + false_negative).
 
     Keyword arguments:
