@@ -2,6 +2,19 @@ from torch.autograd import Variable
 
 
 class Validation():
+    """Performs the validation of ``model`` given a validation dataset
+    data loader, the optimizer, and the loss criterion.
+
+    Keyword arguments:
+    - model (``nn.Module``): the model instance to train.
+    - data_loader (``Dataloader``): Provides single or multi-process
+    iterators over the dataset.
+    - optim (``Optimizer``): The optimization algorithm.
+    - criterion (``Optimizer``): The loss criterion.
+    - use_cuda (``bool``): If ``True``, the training is performed using
+    CUDA operations (GPU).
+
+    """
     def __init__(self, model, data_loader, criterion, metrics, use_cuda):
         self.model = model
         self.data_loader = data_loader
@@ -10,6 +23,12 @@ class Validation():
         self.use_cuda = use_cuda
 
     def run_epoch(self, iteration_loss=False):
+        """Runs an epoch of validation.
+
+        Keyword arguments:
+        - iteration_loss (``bool``, optional): Prints loss at every step.
+
+        """
         epoch_loss = 0.0
         self.metrics.reset()
         for step, batch_data in enumerate(self.data_loader):

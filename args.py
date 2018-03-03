@@ -1,0 +1,69 @@
+from argparse import ArgumentParser
+
+
+def get_arguments():
+    """Defines command-line arguments, and parses them.
+
+    """
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--batch_size",
+        "-b",
+        type=int,
+        default=10,
+        help="The batch size. Default: 10")
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=300,
+        help="Number of training epochs. Default: 300")
+    parser.add_argument(
+        "--learning_rate",
+        "-lr",
+        type=float,
+        default=5e-4,
+        help="The learning rate. Default: 5e-4")
+    parser.add_argument(
+        "--momentum",
+        type=float,
+        default=0.9,
+        help="Momentum factor. Default: 0.9")
+    parser.add_argument(
+        "--weight_decay",
+        "-wd",
+        type=float,
+        default=2e-4,
+        help="L2 regularization factor. Default: 2e-4")
+    parser.add_argument(
+        "--num_classes",
+        "-c",
+        type=int,
+        default=12,
+        help="Number of classes to segment. Default: 12")
+    parser.add_argument(
+        "--weighing",
+        choices=['ENet', 'MFB'],
+        default='ENet',
+        help=
+        "The class weighing technique to apply to the dataset. Default: ENet")
+    parser.add_argument(
+        "--ignore_unlabelled",
+        type=bool,
+        default=True,
+        help=
+        "If True, the unlabelled class weight is ignored (set to 0); "
+        "otherwise, it's kept as computed. Default: True"
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=8,
+        help="Number of subprocesses to use for data loading. Default: 8")
+    parser.add_argument(
+        "--cuda",
+        type=bool,
+        default=True,
+        help="True to use CUDA (GPU). Default: True")
+
+    return parser.parse_args()

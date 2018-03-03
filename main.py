@@ -10,91 +10,120 @@ from models.enet import ENet
 from train import Train
 from val import Validation
 from metrics.iou import IoU
-from utils import imshow_batch
+from args import get_arguments
+import utils
 
-# TODO: Convert variables below into command-line arguments using argparse
-num_workers = 2
-use_cuda = True
-num_classes = 12
-batch_size = 4
-learning_rate = 5e-4
-momentum = 0.9
-weight_decay = 2e-4
-num_epochs = 300
-use_cuda = True and torch.cuda.is_available()
+# Get the arguments
+args = get_arguments()
 
-# Load the training set as tensors
-trainset = CamVidDataset('data/CamVid/', transform=transforms.ToTensor())
-# Split it into minibatches of 4, shuffle, and set the no. of workers
-trainloader = data.DataLoader(
-    trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-# Load the validation set as tensors
-valset = CamVidDataset(
-    'data/CamVid/', mode='val', transform=transforms.ToTensor())
-# Split it into minibatches of 4, shuffle, and set the no. of workers
-valloader = data.DataLoader(
-    trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+def main():
 
-# Initialize the label to PIL class
-to_pil = LabelTensorToPIL()
+    # TODO: Convert variables below into command-line arguments using argparse
+    batch_size = args.batch_size
+    num_epochs = args.epochs
+    learning_rate = args.learning_rate
+    momentum = args.momentum
+    weight_decay = args.weight_decay
+    num_classes = args.num_classes
+    weighing = args.weighing
+    ignore_unlabelled = args.ignore_unlabelled
+    num_workers = args.workers
+    use_cuda = args.cuda and torch.cuda.is_available()
 
-# Remove the road_marking class as it's merged with the road class in the
-# dataset used by the ENet authors
-encoding = to_pil.get_econding()
-_ = encoding.pop('road_marking')
+    # Load the training set as tensors
+    trainset = CamVidDataset('data/CamVid/', transform=transforms.ToTensor())
+    # Split it into minibatches of 4, shuffle, and set the no. of workers
+    trainloader = data.DataLoader(
+        trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-# Display a minibatch to make sure all is ok
-dataiter = iter(trainloader)
-images, labels = dataiter.next()
+    # Load the validation set as tensors
+    valset = CamVidDataset(
+        'data/CamVid/', mode='val', transform=transforms.ToTensor())
+    # Split it into minibatches of 4, shuffle, and set the no. of workers
+    valloader = data.DataLoader(
+        trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-# Convert the single channel label to RGB
-labels_list = [transforms.ToTensor()(to_pil(t)) for t in F.unbind(labels)]
-color_labels = torch.functional.stack(labels_list)
-print(">>>> Close the figure window to continue...")
-imshow_batch(images, color_labels)
+    # Initialize the label to PIL class
+    to_pil = LabelTensorToPIL()
 
-# Intialize ENet
-net = ENet(num_classes)
+    # Remove the road_marking class as it's merged with the road class in the
+    # dataset used by the ENet authors
+    encoding = to_pil.get_econding()
+    _ = encoding.pop('road_marking')
 
-# Check if the network architecture is correct
-print(net)
+    # Display a minibatch to make sure all is ok
+    dataiter = iter(trainloader)
+    images, labels = dataiter.next()
 
-# We are going to use the CrossEntropyLoss loss function as it's most
-# frequentely used in classification problems with multiple classes which
-# fits the problem. This criterion  combines LogSoftMax and NLLLoss.
-criterion = nn.CrossEntropyLoss()
+    # Convert the single channel label to RGB
+    labels_list = [transforms.ToTensor()(to_pil(t)) for t in F.unbind(labels)]
+    color_labels = torch.functional.stack(labels_list)
+    print(">>>> Close the figure window to continue...")
+    utils.imshow_batch(images, color_labels)
 
-# ENet authors used mini-batch gradient descent
-optimizer = optim.SGD(
-    net.parameters(),
-    lr=learning_rate,
-    momentum=momentum,
-    weight_decay=weight_decay)
+    # Intialize ENet
+    net = ENet(num_classes)
 
-# Evaluation metrics
-metrics = IoU(num_classes)
+    # Check if the network architecture is correct
+    print(net)
 
-if use_cuda:
-    net = net.cuda()
-    criterion = criterion.cuda()
+    # Get class weights from the selected weighing technique
+    class_weights = 0
+    if weighing == 'ENet':
+        class_weights = utils.enet_weighing(trainset, num_classes)
+    else:
+        class_weights = utils.median_freq_balancing(trainset, num_classes)
 
-# Start Training
-train = Train(net, trainloader, optimizer, criterion, use_cuda)
-val = Validation(net, valloader, criterion, metrics, use_cuda)
-for epoch in range(num_epochs):
-    print("\n>>>> [Epoch: %d] Training" % epoch)
+    class_weights = torch.from_numpy(class_weights).float()
 
-    epoch_loss = train.run_epoch()
+    # Handle unlabelled class
+    if ignore_unlabelled:
+        class_weights[-1] = 0
 
-    print(">>>> [Epoch: %d] Avg. loss: %.4f" % (epoch, epoch_loss))
+    print("Weighing technique: ", weighing)
+    print("Class weights: ", class_weights)
 
-    if (epoch + 1) % 10 == 0:
-        print(">>>> [Epoch: %d] Validation" % epoch)
+    # We are going to use the CrossEntropyLoss loss function as it's most
+    # frequentely used in classification problems with multiple classes which
+    # fits the problem. This criterion  combines LogSoftMax and NLLLoss.
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-        loss, iou, miou = val.run_epoch()
+    # ENet authors used mini-batch gradient descent
+    optimizer = optim.SGD(
+        net.parameters(),
+        lr=learning_rate,
+        momentum=momentum,
+        weight_decay=weight_decay)
 
-        print(">>>> [Epoch: %d] Avg. loss: %.4f | Mean IoU: %.4f" %
-              (epoch, epoch_loss, miou))
+    # Evaluation metrics
+    metrics = IoU(num_classes)
 
-print("Finished training!")
+    if use_cuda:
+        net = net.cuda()
+        criterion = criterion.cuda()
+
+    # Start Training
+    train = Train(net, trainloader, optimizer, criterion, use_cuda)
+    val = Validation(net, valloader, criterion, metrics, use_cuda)
+    for epoch in range(num_epochs):
+        print(">>>> [Epoch: %d] Training" % epoch)
+
+        epoch_loss = train.run_epoch()
+
+        print(">>>> [Epoch: %d] Avg. loss: %.4f" % (epoch, epoch_loss))
+
+        if (epoch + 1) % 10 == 0:
+            print(">>>> [Epoch: %d] Validation" % epoch)
+
+            loss, iou, miou = val.run_epoch()
+
+            print(">>>> [Epoch: %d] Avg. loss: %.4f | Mean IoU: %.4f" %
+                  (epoch, epoch_loss, miou))
+
+    print("Finished training!")
+
+
+# Run main only if this module is being run directly
+if __name__ == '__main__':
+    main()
