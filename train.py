@@ -28,6 +28,9 @@ class Train():
         Keyword arguments:
         - iteration_loss (``bool``, optional): Prints loss at every step.
 
+        Returns:
+        - The epoch loss (float).
+
         """
         epoch_loss = 0.0
         for step, batch_data in enumerate(self.data_loader):

@@ -25,16 +25,16 @@ def get_arguments():
         default=5e-4,
         help="The learning rate. Default: 5e-4")
     parser.add_argument(
-        "--momentum",
-        type=float,
-        default=0.9,
-        help="Momentum factor. Default: 0.9")
-    parser.add_argument(
         "--weight_decay",
         "-wd",
         type=float,
         default=2e-4,
         help="L2 regularization factor. Default: 2e-4")
+    parser.add_argument(
+        "--dataset",
+        choices=['CamVid'],
+        default='CamVid',
+        help="Dataset to use. Default: CamVid")
     parser.add_argument(
         "--num_classes",
         "-c",

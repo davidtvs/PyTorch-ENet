@@ -9,40 +9,58 @@ from data.camvid import CamVidDataset, LabelTensorToPIL
 from models.enet import ENet
 from train import Train
 from val import Validation
+from test import Test
 from metrics.iou import IoU
 from args import get_arguments
 import utils
 
-# Get the arguments
-args = get_arguments()
+import os
 
+# Run only if this module is being run directly
+if __name__ == '__main__':
+    # Get the arguments
+    args = get_arguments()
 
-def main():
-
-    # TODO: Convert variables below into command-line arguments using argparse
-    batch_size = args.batch_size
-    num_epochs = args.epochs
-    learning_rate = args.learning_rate
-    momentum = args.momentum
-    weight_decay = args.weight_decay
-    num_classes = args.num_classes
-    weighing = args.weighing
-    ignore_unlabelled = args.ignore_unlabelled
-    num_workers = args.workers
     use_cuda = args.cuda and torch.cuda.is_available()
 
-    # Load the training set as tensors
-    trainset = CamVidDataset('data/CamVid/', transform=transforms.ToTensor())
-    # Split it into minibatches of 4, shuffle, and set the no. of workers
-    trainloader = data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    # Folder where datasets are placed
+    data_folder = 'data'
+    # Build path to dataset
+    dataset_path = os.path.join(data_folder, args.dataset)
+    print("Selected dataset: ", dataset_path)
 
-    # Load the validation set as tensors
-    valset = CamVidDataset(
-        'data/CamVid/', mode='val', transform=transforms.ToTensor())
-    # Split it into minibatches of 4, shuffle, and set the no. of workers
-    valloader = data.DataLoader(
-        trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    if args.dataset == 'CamVid':
+        # Load the training set as tensors
+        trainset = CamVidDataset(dataset_path, transform=transforms.ToTensor())
+        # Split it into minibatches, shuffle, and set the no. of workers
+        trainloader = data.DataLoader(
+            trainset,
+            batch_size=args.batch_size,
+            shuffle=True,
+            num_workers=args.workers)
+
+        # Load the validation set as tensors
+        valset = CamVidDataset(
+            dataset_path, mode='val', transform=transforms.ToTensor())
+        # Split it into minibatches, shuffle, and set the no. of workers
+        valloader = data.DataLoader(
+            trainset,
+            batch_size=args.batch_size,
+            shuffle=True,
+            num_workers=args.workers)
+
+        # Load the test set as tensors
+        testset = CamVidDataset(
+            dataset_path, mode='test', transform=transforms.ToTensor())
+        # Split it into minibatches, shuffle, and set the no. of workers
+        testloader = data.DataLoader(
+            trainset,
+            batch_size=args.batch_size,
+            shuffle=True,
+            num_workers=args.workers)
+    else:
+        raise RuntimeError("\"{0}\" is not a supported dataset.".format(
+            args.dataset))
 
     # Initialize the label to PIL class
     to_pil = LabelTensorToPIL()
@@ -63,25 +81,29 @@ def main():
     utils.imshow_batch(images, color_labels)
 
     # Intialize ENet
-    net = ENet(num_classes)
+    net = ENet(args.num_classes)
 
     # Check if the network architecture is correct
     print(net)
 
     # Get class weights from the selected weighing technique
     class_weights = 0
-    if weighing == 'ENet':
-        class_weights = utils.enet_weighing(trainset, num_classes)
+    if args.weighing == 'ENet':
+        class_weights = utils.enet_weighing(trainset, args.num_classes)
+    elif args.Weighing == 'MFB':
+        class_weights = utils.median_freq_balancing(trainset, args.num_classes)
     else:
-        class_weights = utils.median_freq_balancing(trainset, num_classes)
+        raise RuntimeError(
+            "\"{0}\" is not a valid choice for class weighing.".format(
+                args.weighing))
 
     class_weights = torch.from_numpy(class_weights).float()
 
     # Handle unlabelled class
-    if ignore_unlabelled:
+    if args.ignore_unlabelled:
         class_weights[-1] = 0
 
-    print("Weighing technique: ", weighing)
+    print("Weighing technique: ", args.weighing)
     print("Class weights: ", class_weights)
 
     # We are going to use the CrossEntropyLoss loss function as it's most
@@ -90,14 +112,13 @@ def main():
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     # ENet authors used mini-batch gradient descent
-    optimizer = optim.SGD(
+    optimizer = optim.Adam(
         net.parameters(),
-        lr=learning_rate,
-        momentum=momentum,
-        weight_decay=weight_decay)
+        lr=args.learning_rate,
+        weight_decay=args.weight_decay)
 
     # Evaluation metrics
-    metrics = IoU(num_classes)
+    metrics = IoU(args.num_classes)
 
     if use_cuda:
         net = net.cuda()
@@ -106,24 +127,30 @@ def main():
     # Start Training
     train = Train(net, trainloader, optimizer, criterion, use_cuda)
     val = Validation(net, valloader, criterion, metrics, use_cuda)
-    for epoch in range(num_epochs):
+    for epoch in range(args.epochs):
         print(">>>> [Epoch: %d] Training" % epoch)
 
         epoch_loss = train.run_epoch()
 
         print(">>>> [Epoch: %d] Avg. loss: %.4f" % (epoch, epoch_loss))
 
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
             print(">>>> [Epoch: %d] Validation" % epoch)
 
-            loss, iou, miou = val.run_epoch()
+            loss, (iou, miou) = val.run_epoch()
 
             print(">>>> [Epoch: %d] Avg. loss: %.4f | Mean IoU: %.4f" %
                   (epoch, epoch_loss, miou))
 
-    print("Finished training!")
+            if epoch + 1 == args.epochs:
+                print(">>>> [Epoch: %d] Class IoU: ", iou)
 
+    # Test the trained model on the test set
+    test = Test(net, testloader, criterion, metrics, use_cuda)
 
-# Run main only if this module is being run directly
-if __name__ == '__main__':
-    main()
+    print(">>>> Running test dataset")
+
+    loss, (iou, miou) = test.run_epoch()
+
+    print(">>>> Avg. loss: %.4f | Mean IoU: %.4f" % (epoch_loss, miou))
+    print(">>>> Class IoU: ", iou)
