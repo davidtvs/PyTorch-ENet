@@ -51,10 +51,8 @@ def get_arguments():
         "--ignore_unlabelled",
         type=bool,
         default=True,
-        help=
-        "If True, the unlabelled class weight is ignored (set to 0); "
-        "otherwise, it's kept as computed. Default: True"
-    )
+        help="If True, the unlabelled class weight is ignored (set to 0); "
+        "otherwise, it's kept as computed. Default: True")
     parser.add_argument(
         "--workers",
         type=int,
@@ -65,5 +63,17 @@ def get_arguments():
         type=bool,
         default=True,
         help="True to use CUDA (GPU). Default: True")
+
+    # Storage settings
+    parser.add_argument(
+        "--name",
+        type=str,
+        default='ENet',
+        help="Name given to the model when saving.")
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        default='save',
+        help="The directory where models are saved.")
 
     return parser.parse_args()

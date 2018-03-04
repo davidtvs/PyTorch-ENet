@@ -110,3 +110,20 @@ def median_freq_balancing(dataset, num_classes):
     med = np.median(freq)
 
     return med / freq
+
+
+def save(model, name, save_dir):
+    """Saves the model in a specified directory with a specified name.save
+
+    Keyword arguments:
+    - model (``nn.Module``): The model to save.
+    - name (``string``): The saved model name.
+    - save_dir (``string``): The directory where the model is saved
+
+    """
+    if not os.path.isdir(save_dir):
+        raise RuntimeError(
+            "The directory \"{0}\" doesn't exist.".format(save_dir))
+
+    path = os.path.join(save_dir, name)
+    torch.save(model.state_dict(), path)

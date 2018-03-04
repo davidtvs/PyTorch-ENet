@@ -16,10 +16,16 @@ import utils
 
 import os
 
+
 # Run only if this module is being run directly
 if __name__ == '__main__':
     # Get the arguments
     args = get_arguments()
+
+    # Fail fast if the specified directory to save doesn't exist
+    if not os.path.isdir(args.save_dir):
+        raise RuntimeError("The directory \"{0}\" doesn't exist.".format(
+            args.save_dir))
 
     use_cuda = args.cuda and torch.cuda.is_available()
 
@@ -128,29 +134,40 @@ if __name__ == '__main__':
     train = Train(net, trainloader, optimizer, criterion, use_cuda)
     val = Validation(net, valloader, criterion, metrics, use_cuda)
     for epoch in range(args.epochs):
-        print(">>>> [Epoch: %d] Training" % epoch)
+        print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
         epoch_loss = train.run_epoch()
 
-        print(">>>> [Epoch: %d] Avg. loss: %.4f" % (epoch, epoch_loss))
+        print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f}".format(
+            epoch, epoch_loss))
 
         if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
-            print(">>>> [Epoch: %d] Validation" % epoch)
+            print(">>>> [Epoch: {0:d}] Validation".format(epoch))
 
             loss, (iou, miou) = val.run_epoch()
 
-            print(">>>> [Epoch: %d] Avg. loss: %.4f | Mean IoU: %.4f" %
-                  (epoch, epoch_loss, miou))
+            print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
+                  format(epoch, epoch_loss, miou))
 
+            # Print per class IoU on last epoch
             if epoch + 1 == args.epochs:
-                print(">>>> [Epoch: %d] Class IoU: ", iou)
+                for key, class_iou in zip(encoding.keys(), iou):
+                    print("{0}: {1:.4f}".format(key, class_iou))
 
     # Test the trained model on the test set
     test = Test(net, testloader, criterion, metrics, use_cuda)
 
-    print(">>>> Running test dataset")
+    print("\n>>>> Running test dataset")
 
     loss, (iou, miou) = test.run_epoch()
+    class_iou = dict(zip(encoding.keys(), iou))
 
-    print(">>>> Avg. loss: %.4f | Mean IoU: %.4f" % (epoch_loss, miou))
-    print(">>>> Class IoU: ", iou)
+    print(">>>> Avg. loss: {0:.4f} | Mean IoU: {1:.4f}".format(
+        epoch_loss, miou))
+
+    # Print per class IoU
+    for key, class_iou in zip(encoding.keys(), iou):
+        print("{0}: {1:.4f}".format(key, class_iou))
+
+    # Save the model in the given directory with the given name
+    utils.save(net, args.name, args.save_dir)
