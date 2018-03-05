@@ -1,6 +1,8 @@
+import torch
 import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def imshow_batch(images, labels):

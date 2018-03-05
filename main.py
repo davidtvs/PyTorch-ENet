@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,11 +12,9 @@ from models.enet import ENet
 from train import Train
 from val import Validation
 from test import Test
-from metrics.iou import IoU
+from metric.iou import IoU
 from args import get_arguments
 import utils
-
-import os
 
 
 # Run only if this module is being run directly
