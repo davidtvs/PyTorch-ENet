@@ -1,8 +1,9 @@
 import numpy as np
 import torch
+from metric import metric
 
 
-class ConfusionMeter():
+class ConfusionMatrix(metric.Metric):
     """
     The ConfusionMeter constructs a confusion matrix for a multi-class
     classification problems. It does not support multi-label, multi-class
@@ -13,6 +14,7 @@ class ConfusionMeter():
     - normalized (boolean, optional): Determines whether or not the confusion
     matrix is normalized or not. Default: False.
 
+    Modified from: https://github.com/pytorch/tnt/blob/master/torchnet/meter/confusionmeter.py
     """
 
     def __init__(self, k, normalized=False):
@@ -38,14 +40,10 @@ class ConfusionMeter():
 
         """
         # If target and/or predicted are tensors, convert them to numpy arrays
-        if isinstance(predicted,
-                      (torch.FloatTensor, torch.DoubleTensor,
-                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
-            predicted = predicted.numpy()
-        if isinstance(target,
-                      (torch.FloatTensor, torch.DoubleTensor,
-                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
-            target = target.numpy()
+        if torch.is_tensor(predicted):
+            predicted = predicted.cpu().numpy()
+        if torch.is_tensor(target):
+            target = target.cpu().numpy()
 
         assert predicted.shape[0] == target.shape[0], \
             'number of targets and predicted outputs do not match'

@@ -54,7 +54,7 @@ class Validation():
             epoch_loss += loss.data[0]
 
             # Keep track of evaluation metrics
-            self.metrics.add(outputs.data.cpu(), labels.data.cpu())
+            self.metrics.add(outputs.data, labels.data)
 
             if iteration_loss:
                 print("[Step: %d] Iteration loss: %.4f" % (step, loss.data[0]))

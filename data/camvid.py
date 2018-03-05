@@ -85,18 +85,18 @@ class LabelTensorToPIL(object):
         # dictionary is ordered so we can assume that the index of the
         # (key,value) pair is the same as the class number
         label_to_color = OrderedDict([('sky', (128, 128, 128)),
-                              ('building', (128, 0, 0)),
-                              ('pole', (192, 192, 128)),
-                              ('road_marking', (255, 69, 0)),
-                              ('road', (128, 64, 128)),
-                              ('pavement', (60, 40, 222)),
-                              ('tree', (128, 128, 0)),
-                              ('sign_symbol', (192, 128, 128)),
-                              ('fence', (64, 64, 128)),
-                              ('car', (64, 0, 128)),
-                              ('pedestrian', (64, 64, 0)),
-                              ('bicyclist', (0, 128, 192)),
-                              ('unlabelled', (0, 0, 0))])
+                                      ('building', (128, 0, 0)),
+                                      ('pole', (192, 192, 128)),
+                                      ('road_marking', (255, 69, 0)),
+                                      ('road', (128, 64, 128)),
+                                      ('pavement', (60, 40, 222)),
+                                      ('tree', (128, 128, 0)),
+                                      ('sign_symbol', (192, 128, 128)),
+                                      ('fence', (64, 64, 128)),
+                                      ('car', (64, 0, 128)),
+                                      ('pedestrian', (64, 64, 0)),
+                                      ('bicyclist', (0, 128, 192)),
+                                      ('unlabelled', (0, 0, 0))])
 
         return label_to_color
 

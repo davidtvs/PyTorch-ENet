@@ -1,8 +1,9 @@
 import numpy as np
-from .multilabelconfusionmeter import MultiLabelConfusionMeter
+from metric import metric
+from metric.multilabelconfusionmatrix import MultiLabelConfusionMatrix
 
 
-class IoU():
+class IoU(metric.Metric):
     """Computes the intersection over union (IoU) per class and corresponding
     mean (mIoU).
 
@@ -19,7 +20,8 @@ class IoU():
     """
 
     def __init__(self, k, normalized=False):
-        self.conf_metric = MultiLabelConfusionMeter(k, normalized=normalized)
+        self.conf_metric = MultiLabelConfusionMatrix(
+            k, normalized=normalized)
 
     def reset(self):
         self.conf_metric.reset()

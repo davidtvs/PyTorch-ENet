@@ -1,9 +1,10 @@
 import torch
 import numpy as np
-from .confusionmeter import ConfusionMeter
+from metric import metric
+from metric.confusionmatrix import ConfusionMatrix
 
 
-class MultiLabelConfusionMeter():
+class MultiLabelConfusionMatrix(metric.Metric):
     """
     The MultiLabelConfusionMeter constructs a confusion matrix for multi-class
     multi-label classification problems.
@@ -16,7 +17,7 @@ class MultiLabelConfusionMeter():
     """
 
     def __init__(self, k, normalized=False):
-        self.confusion = ConfusionMeter(k, normalized)
+        self.confusion = ConfusionMatrix(k, normalized)
         self.normalized = normalized
         self.k = k
 
@@ -37,14 +38,10 @@ class MultiLabelConfusionMeter():
 
         """
         # If target and/or predicted are tensors, convert them to numpy arrays
-        if isinstance(predicted,
-                      (torch.FloatTensor, torch.DoubleTensor,
-                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
-            predicted = predicted.numpy()
-        if isinstance(target,
-                      (torch.FloatTensor, torch.DoubleTensor,
-                       torch.ShortTensor, torch.IntTensor, torch.LongTensor)):
-            target = target.numpy()
+        if torch.is_tensor(predicted):
+            predicted = predicted.cpu().numpy()
+        if torch.is_tensor(target):
+            target = target.cpu().numpy()
 
         assert np.ndim(target) == 3 or np.ndim(target) == 4, \
             'targets must be of dimension (N, H, W) or (N, K, H, W)'
@@ -59,11 +56,7 @@ class MultiLabelConfusionMeter():
         if np.ndim(predicted) == 4:
             predicted = np.argmax(predicted, 1)
 
-        # Flatten matrices for ConfusionMeter
-        predicted = np.reshape(predicted, -1)
-        target = np.reshape(target, -1)
-
-        self.confusion.add(predicted, target)
+        self.confusion.add(predicted.flatten(), target.flatten())
 
     def value(self):
         """
