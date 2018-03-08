@@ -7,7 +7,8 @@ import torch.utils.data as data
 import torch.functional as F
 import torchvision.transforms as transforms
 
-from data.camvid import CamVidDataset, LabelTensorToPIL
+import data as dataset
+import transforms as ext_transforms
 from models.enet import ENet
 from train import Train
 from val import Validation
@@ -15,7 +16,6 @@ from test import Test
 from metric.iou import IoU
 from args import get_arguments
 import utils
-
 
 # Run only if this module is being run directly
 if __name__ == '__main__':
@@ -35,9 +35,12 @@ if __name__ == '__main__':
     dataset_path = os.path.join(data_folder, args.dataset)
     print("Selected dataset: ", dataset_path)
 
-    if args.dataset == 'CamVid':
+    if args.dataset.lower() == 'camvid':
         # Load the training set as tensors
-        trainset = CamVidDataset(dataset_path, transform=transforms.ToTensor())
+        trainset = dataset.CamVid(
+            dataset_path,
+            transform=transforms.ToTensor(),
+            label_transform=ext_transforms.PILToLongTensor())
         # Split it into minibatches, shuffle, and set the no. of workers
         trainloader = data.DataLoader(
             trainset,
@@ -46,8 +49,11 @@ if __name__ == '__main__':
             num_workers=args.workers)
 
         # Load the validation set as tensors
-        valset = CamVidDataset(
-            dataset_path, mode='val', transform=transforms.ToTensor())
+        valset = dataset.CamVid(
+            dataset_path,
+            mode='val',
+            transform=transforms.ToTensor(),
+            label_transform=ext_transforms.PILToLongTensor())
         # Split it into minibatches, shuffle, and set the no. of workers
         valloader = data.DataLoader(
             trainset,
@@ -56,8 +62,11 @@ if __name__ == '__main__':
             num_workers=args.workers)
 
         # Load the test set as tensors
-        testset = CamVidDataset(
-            dataset_path, mode='test', transform=transforms.ToTensor())
+        testset = dataset.CamVid(
+            dataset_path,
+            mode='test',
+            transform=transforms.ToTensor(),
+            label_transform=ext_transforms.PILToLongTensor())
         # Split it into minibatches, shuffle, and set the no. of workers
         testloader = data.DataLoader(
             trainset,
@@ -68,21 +77,30 @@ if __name__ == '__main__':
         raise RuntimeError("\"{0}\" is not a supported dataset.".format(
             args.dataset))
 
-    # Initialize the label to PIL class
-    to_pil = LabelTensorToPIL()
+    # Initialize the label to PIL trasnform
+    to_pil = ext_transforms.TensorToPIL()
 
     # Remove the road_marking class as it's merged with the road class in the
     # dataset used by the ENet authors
-    encoding = to_pil.get_econding()
+    encoding = trainset.color_encoding
     _ = encoding.pop('road_marking')
 
     # Display a minibatch to make sure all is ok
     dataiter = iter(trainloader)
     images, labels = dataiter.next()
 
-    # Convert the single channel label to RGB
-    labels_list = [transforms.ToTensor()(to_pil(t)) for t in F.unbind(labels)]
-    color_labels = torch.functional.stack(labels_list)
+    # Convert the single channel label to RGB in tensor form
+    # 1. F.unbind removes the 0-dimension of "labels" and returns a tuple of all
+    # slices along that dimension
+    # 2. to_pil converts the single channel tensor image to an RGB PIL image,
+    # using the specified color encoding
+    # 3. The color image is converted to Tensor
+    # The result is a tuple of RGB tensor images
+    tensor_labels = [
+        transforms.ToTensor()(to_pil(tensor, encoding))
+        for tensor in F.unbind(labels)
+    ]
+    color_labels = torch.functional.stack(tensor_labels)
     print(">>>> Close the figure window to continue...")
     utils.imshow_batch(images, color_labels)
 

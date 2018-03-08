@@ -7,6 +7,7 @@ def get_arguments():
     """
     parser = ArgumentParser()
 
+    # Hyperparameters
     parser.add_argument(
         "--batch_size",
         "-b",
@@ -30,6 +31,8 @@ def get_arguments():
         type=float,
         default=2e-4,
         help="L2 regularization factor. Default: 2e-4")
+
+    # Dataset
     parser.add_argument(
         "--dataset",
         choices=['CamVid'],
@@ -53,6 +56,8 @@ def get_arguments():
         default=True,
         help="If True, the unlabelled class weight is ignored (set to 0); "
         "otherwise, it's kept as computed. Default: True")
+
+    # Settings
     parser.add_argument(
         "--workers",
         type=int,
