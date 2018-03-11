@@ -54,7 +54,7 @@ def enet_weighing(dataset, num_classes, c=1.02):
         label = label.cpu().numpy()
 
         # Flatten label
-        flat_label = np.reshape(label, -1)
+        flat_label = label.flatten()
 
         # Sum up the number of pixels of each class and the total pixel
         # counts for each label
@@ -90,7 +90,7 @@ def median_freq_balancing(dataset, num_classes):
         label = label.cpu().numpy()
 
         # Flatten label
-        flat_label = np.reshape(label, -1)
+        flat_label = label.flatten()
 
         # Sum up the class frequencies
         bincount = np.bincount(flat_label, minlength=num_classes)

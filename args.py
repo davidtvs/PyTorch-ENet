@@ -35,21 +35,31 @@ def get_arguments():
     # Dataset
     parser.add_argument(
         "--dataset",
-        choices=['CamVid'],
+        choices=['CamVid', 'Cityscapes'],
         default='CamVid',
         help="Dataset to use. Default: CamVid")
     parser.add_argument(
-        "--num_classes",
-        "-c",
+        "--dataset_dir",
+        type=str,
+        default="data/CamVid",
+        help="Path to the root directory of the selected dataset. "
+        "Default: data/CamVid")
+    parser.add_argument(
+        "--height",
         type=int,
-        default=12,
-        help="Number of classes to segment. Default: 12")
+        default=360,
+        help="The image height. Default: 360")
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=480,
+        help="The image height. Default: 480")
     parser.add_argument(
         "--weighing",
         choices=['ENet', 'MFB'],
         default='ENet',
-        help=
-        "The class weighing technique to apply to the dataset. Default: ENet")
+        help="The class weighing technique to apply to the dataset. "
+        "Default: ENet")
     parser.add_argument(
         "--ignore_unlabelled",
         type=bool,
@@ -63,6 +73,11 @@ def get_arguments():
         type=int,
         default=8,
         help="Number of subprocesses to use for data loading. Default: 8")
+    parser.add_argument(
+        "--print_step",
+        type=bool,
+        default=False,
+        help="True to print step loss. Default: False")
     parser.add_argument(
         "--cuda",
         type=bool,
