@@ -73,17 +73,17 @@ if __name__ == '__main__':
             batch_size=args.batch_size,
             shuffle=True,
             num_workers=args.workers)
+
+        # Remove the road_marking class as it's merged with the road class in
+        # the dataset used by the ENet authors
+        encoding = trainset.color_encoding
+        _ = encoding.pop('road_marking')
     else:
         raise RuntimeError("\"{0}\" is not a supported dataset.".format(
             args.dataset))
 
     # Initialize the label to PIL trasnform
-    to_pil = ext_transforms.TensorToPIL()
-
-    # Remove the road_marking class as it's merged with the road class in the
-    # dataset used by the ENet authors
-    encoding = trainset.color_encoding
-    _ = encoding.pop('road_marking')
+    to_pil = ext_transforms.LongTensorToPIL()
 
     # Display a minibatch to make sure all is ok
     dataiter = iter(trainloader)
@@ -100,7 +100,9 @@ if __name__ == '__main__':
         transforms.ToTensor()(to_pil(tensor, encoding))
         for tensor in F.unbind(labels)
     ]
-    color_labels = torch.functional.stack(tensor_labels)
+    color_labels = F.stack(tensor_labels)
+    print()
+    print("Class-color encoding:", encoding)
     print(">>>> Close the figure window to continue...")
     utils.imshow_batch(images, color_labels)
 

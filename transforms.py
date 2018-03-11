@@ -44,7 +44,7 @@ class PILToLongTensor(object):
                                              2).contiguous().long().squeeze_()
 
 
-class TensorToPIL(object):
+class LongTensorToPIL(object):
     """Converts a ``torch.LongTensor`` to a ``PIL image``.
 
     The input is a ``torch.LongTensor`` where each pixel's value identifies the
@@ -78,7 +78,7 @@ class TensorToPIL(object):
         if len(tensor.size()) == 2:
             tensor.unsqueeze_(0)
 
-        color_tensor = torch.Tensor(3, tensor.size(1), tensor.size(2))
+        color_tensor = torch.ByteTensor(3, tensor.size(1), tensor.size(2))
 
         for index, (class_name, color) in enumerate(encoding.items()):
             # Get a mask of elements equal to index
