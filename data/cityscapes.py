@@ -20,16 +20,16 @@ class Cityscapes(data.Dataset):
 
     """
     # Training dataset root folders
-    train_folder = "gtFine_trainvaltest/gtFine/train"
-    train_lbl_folder = "leftImg8bit_trainvaltest/leftImg8bit/train"
+    train_folder = "leftImg8bit_trainvaltest/leftImg8bit/train"
+    train_lbl_folder = "gtFine_trainvaltest/gtFine/train"
 
     # Validation dataset root folders
-    val_folder = "gtFine_trainvaltest/gtFine/val"
-    val_lbl_folder = "leftImg8bit_trainvaltest/leftImg8bit/val"
+    val_folder = "leftImg8bit_trainvaltest/leftImg8bit/val"
+    val_lbl_folder = "gtFine_trainvaltest/gtFine/val"
 
     # Test dataset root folders
-    test_folder = "gtFine_trainvaltest/gtFine/test"
-    test_lbl_folder = "leftImg8bit_trainvaltest/leftImg8bit/test"
+    test_folder = "leftImg8bit_trainvaltest/leftImg8bit/test"
+    test_lbl_folder = "gtFine_trainvaltest/gtFine/test"
 
     # Filters to find the images
     img_extension = '.png'
@@ -155,7 +155,7 @@ class Cityscapes(data.Dataset):
             return len(self.train_data)
         elif self.mode.lower() == 'val':
             return len(self.val_data)
-        elif self.mod.lower() == 'test':
+        elif self.mode.lower() == 'test':
             return len(self.test_data)
         else:
             raise RuntimeError("Unexpected dataset mode. "

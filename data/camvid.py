@@ -135,7 +135,7 @@ class CamVid(data.Dataset):
             return len(self.train_data)
         elif self.mode.lower() == 'val':
             return len(self.val_data)
-        elif self.mod.lower() == 'test':
+        elif self.mode.lower() == 'test':
             return len(self.test_data)
         else:
             raise RuntimeError("Unexpected dataset mode. "
