@@ -41,6 +41,7 @@ def get_files(folder, name_filter=None, extension_filter=None):
     # Explore the directory tree to get files that contain "name_filter" and
     # with extension "extension_filter"
     for path, _, files in os.walk(folder):
+        files.sort()
         for file in files:
             if name_cond(file) and ext_cond(file):
                 full_path = os.path.join(path, file)
