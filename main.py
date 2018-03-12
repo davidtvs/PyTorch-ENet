@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     use_cuda = args.cuda and torch.cuda.is_available()
 
-    print(">>>> Model initialization")
+    print("\n\n>>>> Model initialization")
 
     # Fail fast if the dataset directory to save doesn't exist
     assert os.path.isdir(
@@ -245,4 +245,4 @@ if __name__ == '__main__':
 
     # Save the model in the given directory with the given name
     print("\n>>>> Saving model")
-    utils.save(net, args.name, args.save_dir)
+    utils.save(net, args)

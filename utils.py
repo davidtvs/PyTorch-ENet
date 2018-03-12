@@ -113,18 +113,34 @@ def median_freq_balancing(dataset, num_classes):
     return med / freq
 
 
-def save(model, name, save_dir):
+def save(model, args):
     """Saves the model in a specified directory with a specified name.save
 
     Keyword arguments:
     - model (``nn.Module``): The model to save.
-    - name (``string``): The saved model name.
-    - save_dir (``string``): The directory where the model is saved
+    - args (``ArgumentParser``): An instance of ArgumentParser which contains
+    the arguments used to train ``model``.
 
     """
-    if not os.path.isdir(save_dir):
-        raise RuntimeError(
-            "The directory \"{0}\" doesn't exist.".format(save_dir))
+    name = args.name
+    save_dir = args.save_dir
 
-    path = os.path.join(save_dir, name)
-    torch.save(model.state_dict(), path)
+    assert os.path.isdir(
+        save_dir), "The directory \"{0}\" doesn't exist.".format(save_dir)
+
+    # Create folder to save model and information
+    folder = os.path.join(save_dir, name)
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+
+    # Save model
+    model_path = os.path.join(folder, name)
+    torch.save(model.state_dict(), model_path)
+
+    # Save arguments
+    arg_filename = os.path.join(folder, name + '_args.txt')
+    with open(arg_filename, 'w') as arg_file:
+        sorted_args = sorted(vars(args))
+        for arg in sorted_args:
+            arg_str = "{0}: {1}\n".format(arg, getattr(args, arg))
+            arg_file.write(arg_str)
