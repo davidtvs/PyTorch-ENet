@@ -44,21 +44,25 @@ class PILToLongTensor(object):
                                              2).contiguous().long().squeeze_()
 
 
-class LongTensorToPIL(object):
+class LongTensorToRGBPIL(object):
     """Converts a ``torch.LongTensor`` to a ``PIL image``.
 
     The input is a ``torch.LongTensor`` where each pixel's value identifies the
     class.
 
-    """
+    Keyword arguments:
+    - rgb_encoding (``OrderedDict``): An ``OrderedDict`` that relates pixel
+    values, class names, and class colors.
 
-    def __call__(self, tensor, encoding):
+    """
+    def __init__(self, rgb_encoding):
+        self.rgb_encoding = rgb_encoding
+
+    def __call__(self, tensor):
         """Performs the conversion from ``torch.LongTensor`` to a ``PIL image``
 
         Keyword arguments:
         - tensor (``torch.LongTensor``): the tensor to convert
-        - encoding (``OrderedDict``): An ``OrderedDict`` that relates pixel
-        values, class names, and class colors.
 
         Returns:
         A ``PIL.Image``.
@@ -69,9 +73,9 @@ class LongTensorToPIL(object):
             raise TypeError("label_tensor should be torch.LongTensor. Got {}"
                             .format(type(tensor)))
         # Check if encoding is a ordered dictionary
-        if not isinstance(encoding, OrderedDict):
+        if not isinstance(self.rgb_encoding, OrderedDict):
             raise TypeError("encoding should be an OrderedDict. Got {}".format(
-                type(encoding)))
+                type(self.rgb_encoding)))
 
         # label_tensor might be an image without a channel dimension, in this
         # case unsqueeze it
@@ -80,7 +84,7 @@ class LongTensorToPIL(object):
 
         color_tensor = torch.ByteTensor(3, tensor.size(1), tensor.size(2))
 
-        for index, (class_name, color) in enumerate(encoding.items()):
+        for index, (class_name, color) in enumerate(self.rgb_encoding.items()):
             # Get a mask of elements equal to index
             mask = torch.eq(tensor, index).squeeze_()
             # Fill color_tensor with corresponding colors

@@ -1,8 +1,27 @@
 import torch
+import torch.functional as F
 import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+
+
+def batch_transform(batch, transform):
+    """Applies a transform to a batch of samples.
+
+    Keyword arguments:
+    - batch (): a batch os samples
+    - transform (callable): A function/transform to apply to ``batch``
+
+    """
+
+    # Convert the single channel label to RGB in tensor form
+    # 1. F.unbind removes the 0-dimension of "labels" and returns a tuple of
+    # all slices along that dimension
+    # 2. the transform is applied to each slice
+    transf_slices = [transform(tensor) for tensor in F.unbind(batch)]
+
+    return F.stack(transf_slices)
 
 
 def imshow_batch(images, labels):
@@ -28,92 +47,7 @@ def imshow_batch(images, labels):
     plt.show()
 
 
-def enet_weighing(dataset, num_classes, c=1.02):
-    """Computes class weights as described in the ENet paper:
-
-        w_class = 1 / (ln(c + p_class)),
-
-    where c is usually 1.02 and p_class is the propensity score of that
-    class:
-
-        propensity_score = freq_class / total_pixels.
-
-    References: https://arxiv.org/abs/1606.02147
-
-    Keyword arguments:
-    - dataset (``Dataset``): A ``Dataset`` instance containing the labels
-    whose weights are going to be computed.
-    - num_classes (``int``): The number of classes
-    - c (``int``, optional): AN additional hyper-parameter which restricts
-    the interval of values for the weights. Default: 1.02.
-
-    """
-    class_count = 0
-    total = 0
-    for _, label in dataset:
-        label = label.cpu().numpy()
-
-        # Flatten label
-        flat_label = label.flatten()
-
-        # Sum up the number of pixels of each class and the total pixel
-        # counts for each label
-        class_count += np.bincount(flat_label, minlength=num_classes)
-        total += flat_label.size
-
-    # Compute propensity score and then the weights for each class
-    propensity_score = class_count / total
-    class_weights = 1 / (np.log(c + propensity_score))
-
-    return class_weights
-
-
-def median_freq_balancing(dataset, num_classes):
-    """Computes class weights using median frequency balancing as described
-    in https://arxiv.org/abs/1411.4734:
-
-        w_class = median_freq / freq_class,
-
-    where freq_class is the number of pixels of a given class divided by
-    the total number of pixels in images where that class is present, and
-    median_freq is the median of freq_class.
-
-    Keyword arguments:
-    - dataset (``Dataset``): A ``Dataset`` instance containing the labels
-    whose weights are going to be computed.
-    - num_classes (``int``): The number of classes
-
-    """
-    class_count = 0
-    total = 0
-    for _, label in dataset:
-        label = label.cpu().numpy()
-
-        # Flatten label
-        flat_label = label.flatten()
-
-        # Sum up the class frequencies
-        bincount = np.bincount(flat_label, minlength=num_classes)
-
-        # Create of mask of classes that exist in the label
-        mask = bincount > 0
-        # Multiply the mask by the pixel count. The resulting array has
-        # one element for each class. The value is either 0 (if the class
-        # does not exist in the label) or equal to the pixel count (if
-        # the class exists in the label)
-        total += mask * flat_label.size
-
-        # Sum up the number of pixels found for each class
-        class_count += bincount
-
-    # Compute the frequency and its median
-    freq = class_count / total
-    med = np.median(freq)
-
-    return med / freq
-
-
-def save(model, args):
+def save_checkpoint(model, args):
     """Saves the model in a specified directory with a specified name.save
 
     Keyword arguments:
@@ -128,19 +62,41 @@ def save(model, args):
     assert os.path.isdir(
         save_dir), "The directory \"{0}\" doesn't exist.".format(save_dir)
 
-    # Create folder to save model and information
-    folder = os.path.join(save_dir, name)
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
-
     # Save model
-    model_path = os.path.join(folder, name)
+    model_path = os.path.join(save_dir, name)
     torch.save(model.state_dict(), model_path)
 
     # Save arguments
-    arg_filename = os.path.join(folder, name + '_args.txt')
+    arg_filename = os.path.join(save_dir, name + '_args.txt')
     with open(arg_filename, 'w') as arg_file:
         sorted_args = sorted(vars(args))
         for arg in sorted_args:
             arg_str = "{0}: {1}\n".format(arg, getattr(args, arg))
             arg_file.write(arg_str)
+
+
+def load_checkpoint(model, folder_dir, filename):
+    """Saves the model in a specified directory with a specified name.save
+
+    Keyword arguments:
+    - model (``nn.Module``): The stored model state is copied to this model
+    instance.
+    - folder_dir (``string``): The path to the folder where the saved model
+    state is located.
+    - filename (``string``): The model filename.
+
+    Returns:
+    The ``model` instance with the loaded state.
+
+    """
+
+    assert os.path.isdir(
+        folder_dir), "The directory \"{0}\" doesn't exist.".format(folder_dir)
+
+    # Create folder to save model and information
+    model_path = os.path.join(folder_dir, filename)
+    print(model_path)
+    # Load the stored model parameters to the model instance
+    checkpoint = torch.load(model_path)
+    model.load_state_dict(checkpoint)
+    return model

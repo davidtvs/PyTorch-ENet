@@ -7,6 +7,16 @@ def get_arguments():
     """
     parser = ArgumentParser()
 
+    # Execution mode
+    parser.add_argument(
+        "--mode",
+        "-m",
+        choices=['train', 'test', 'full'],
+        default='train',
+        help="train: performs training and validation; test: tests the model "
+        "found in \"--save_dir\" with name \"--name\" on \"--dataset\"; "
+        "full: combines train and test modes. Default: train")
+
     # Hyperparameters
     parser.add_argument(
         "--batch_size",
@@ -35,9 +45,9 @@ def get_arguments():
     # Dataset
     parser.add_argument(
         "--dataset",
-        choices=['CamVid', 'Cityscapes'],
-        default='CamVid',
-        help="Dataset to use. Default: CamVid")
+        choices=['camvid', 'cityscapes'],
+        default='camvid',
+        help="Dataset to use. Default: camvid")
     parser.add_argument(
         "--dataset_dir",
         type=str,
@@ -56,10 +66,10 @@ def get_arguments():
         help="The image height. Default: 480")
     parser.add_argument(
         "--weighing",
-        choices=['ENet', 'MFB'],
+        choices=['enet', 'mfb', 'none'],
         default='ENet',
         help="The class weighing technique to apply to the dataset. "
-        "Default: ENet")
+        "Default: enet")
     parser.add_argument(
         "--ignore_unlabelled",
         type=bool,
