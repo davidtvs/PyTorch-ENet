@@ -16,6 +16,13 @@ def get_arguments():
         help="train: performs training and validation; test: tests the model "
         "found in \"--save_dir\" with name \"--name\" on \"--dataset\"; "
         "full: combines train and test modes. Default: train")
+    parser.add_argument(
+        "--resume",
+        type=bool,
+        default=False,
+        help="If set to true, the model found in \"--save_dir\" with name "
+        "\"--name\" is loaded and training is resumed from the epoch it was "
+        "saved in. Default: False")
 
     # Hyperparameters
     parser.add_argument(

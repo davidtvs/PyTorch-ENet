@@ -47,13 +47,17 @@ def imshow_batch(images, labels):
     plt.show()
 
 
-def save_checkpoint(model, args):
+def save_checkpoint(model, optimizer, epoch, miou, args):
     """Saves the model in a specified directory with a specified name.save
 
     Keyword arguments:
     - model (``nn.Module``): The model to save.
+    - optimizer (``torch.optim``): The optimizer state to save.
+    - epoch (``int``): The current epoch for the model.
+    - miou (``float``): The mean IoU obtained by the model.
     - args (``ArgumentParser``): An instance of ArgumentParser which contains
-    the arguments used to train ``model``.
+    the arguments used to train ``model``. The arguments are written to a text
+    file in ``args.save_dir`` named "``args.name``_args.txt".
 
     """
     name = args.name
@@ -64,7 +68,13 @@ def save_checkpoint(model, args):
 
     # Save model
     model_path = os.path.join(save_dir, name)
-    torch.save(model.state_dict(), model_path)
+    checkpoint = {
+        'epoch': epoch,
+        'miou': miou,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict()
+    }
+    torch.save(checkpoint, model_path)
 
     # Save arguments
     arg_filename = os.path.join(save_dir, name + '_args.txt')
@@ -75,28 +85,36 @@ def save_checkpoint(model, args):
             arg_file.write(arg_str)
 
 
-def load_checkpoint(model, folder_dir, filename):
+def load_checkpoint(model, optimizer, folder_dir, filename):
     """Saves the model in a specified directory with a specified name.save
 
     Keyword arguments:
     - model (``nn.Module``): The stored model state is copied to this model
     instance.
+    - optimizer (``torch.optim``): The stored optimizer state is copied to this
+    optimizer instance.
     - folder_dir (``string``): The path to the folder where the saved model
     state is located.
     - filename (``string``): The model filename.
 
     Returns:
-    The ``model` instance with the loaded state.
+    The epoch, mean IoU, ``model``, and ``optimizer`` loaded from the
+    checkpoint.
 
     """
-
     assert os.path.isdir(
         folder_dir), "The directory \"{0}\" doesn't exist.".format(folder_dir)
 
     # Create folder to save model and information
     model_path = os.path.join(folder_dir, filename)
-    print(model_path)
+    assert os.path.isfile(
+        model_path), "The model file \"{0}\" doesn't exist.".format(filename)
+
     # Load the stored model parameters to the model instance
     checkpoint = torch.load(model_path)
-    model.load_state_dict(checkpoint)
-    return model
+    model.load_state_dict(checkpoint['state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer'])
+    epoch = checkpoint['epoch']
+    miou = checkpoint['miou']
+
+    return model, optimizer, epoch, miou

@@ -15,6 +15,11 @@ from args import get_arguments
 from data.utils import enet_weighing, median_freq_balancing
 import utils
 
+# Get the arguments
+args = get_arguments()
+
+use_cuda = args.cuda and torch.cuda.is_available()
+
 
 def load_dataset(dataset):
     print("\nLoading dataset...\n")
@@ -102,8 +107,8 @@ def load_dataset(dataset):
     utils.imshow_batch(images, color_labels)
 
     # Get class weights from the selected weighing technique
-    print("Weighing technique:", args.weighing)
-    print("\nComputing class weights...")
+    print("\nWeighing technique:", args.weighing)
+    print("Computing class weights...")
     print("(this can take a while depending on the dataset size)")
     class_weights = 0
     if args.weighing.lower() == 'enet':
@@ -127,7 +132,7 @@ def load_dataset(dataset):
     return (train_loader, val_loader, test_loader), class_weights, encoding
 
 
-def train(train_loader, val_loader, class_weights, class_encoding, use_cuda):
+def train(train_loader, val_loader, class_weights, class_encoding):
     print("\nTraining...\n")
 
     num_classes = len(class_encoding)
@@ -142,7 +147,7 @@ def train(train_loader, val_loader, class_weights, class_encoding, use_cuda):
     # fits the problem. This criterion  combines LogSoftMax and NLLLoss.
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-    # ENet authors used mini-batch gradient descent
+    # ENet authors used Adam as the optimizer
     optimizer = optim.Adam(
         model.parameters(),
         lr=args.learning_rate,
@@ -155,11 +160,21 @@ def train(train_loader, val_loader, class_weights, class_encoding, use_cuda):
         model = model.cuda()
         criterion = criterion.cuda()
 
+    # Optionally resume from a checkpoint
+    if args.resume:
+        model, optimizer, start_epoch, best_miou = utils.load_checkpoint(
+            model, optimizer, args.save_dir, args.name)
+        print("Resuming from model: Start epoch = {0} "
+              "| Best mean IoU = {1:.4f}".format(start_epoch, best_miou))
+    else:
+        start_epoch = 0
+        best_miou = 0
+
     # Start Training
     print()
     train = Train(model, train_loader, optimizer, criterion, use_cuda)
     val = Test(model, val_loader, criterion, metrics, use_cuda)
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch, args.epochs):
         print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
         epoch_loss = train.run_epoch(args.print_step)
@@ -175,19 +190,22 @@ def train(train_loader, val_loader, class_weights, class_encoding, use_cuda):
             print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
                   format(epoch, loss, miou))
 
-            # Print per class IoU on last epoch
-            if epoch + 1 == args.epochs:
+            # Print per class IoU on last epoch or if best iou
+            if epoch + 1 == args.epochs or miou > best_miou:
                 for key, class_iou in zip(class_encoding.keys(), iou):
                     print("{0}: {1:.4f}".format(key, class_iou))
 
-    # Save the model in the given directory with the given name
-    print("\nSaving model")
-    utils.save_checkpoint(model, args)
+            # Save the model if it's the best thus far
+            if miou > best_miou:
+                print("\nBest model thus far. Saving...\n")
+                best_miou = miou
+                utils.save_checkpoint(model, optimizer, epoch + 1, best_miou,
+                                      args)
 
     return model
 
 
-def test(model, test_loader, class_weights, class_encoding, use_cuda):
+def test(model, test_loader, class_weights, class_encoding):
     print("\nTesting...\n")
 
     num_classes = len(class_encoding)
@@ -219,10 +237,6 @@ def test(model, test_loader, class_weights, class_encoding, use_cuda):
 
 # Run only if this module is being run directly
 if __name__ == '__main__':
-    # Get the arguments
-    args = get_arguments()
-
-    cuda = args.cuda and torch.cuda.is_available()
 
     # Fail fast if the dataset directory doesn't exist
     assert os.path.isdir(
@@ -248,21 +262,25 @@ if __name__ == '__main__':
     train_loader, val_loader, test_loader = loaders
 
     if args.mode.lower() in {'train', 'full'}:
-        model = train(train_loader, val_loader, w_class, class_encoding,
-                      cuda)
+        model = train(train_loader, val_loader, w_class, class_encoding)
         if args.mode.lower() == 'full':
-            test(model, test_loader, w_class, class_encoding, cuda)
+            test(model, test_loader, w_class, class_encoding)
     elif args.mode.lower() == 'test':
         # Intialize a new ENet model
         num_classes = len(class_encoding)
         model = ENet(num_classes)
-        if cuda:
+        if use_cuda:
             model = model.cuda()
 
+        # Initialize a optimizer just so we can retrieve the model from the
+        # checkpoint
+        optimizer = optim.Adam(model.parameters())
+
         # Load the previoulsy saved model state to the ENet model
-        model = utils.load_checkpoint(model, args.save_dir, args.name)
+        model = utils.load_checkpoint(model, optimizer, args.save_dir,
+                                      args.name)[0]
         print(model)
-        test(model, test_loader, w_class, class_encoding, cuda)
+        test(model, test_loader, w_class, class_encoding)
     else:
         # Should never happen...but just in case it does
         raise RuntimeError(
