@@ -96,6 +96,12 @@ def get_arguments():
         default=False,
         help="True to print step loss. Default: False")
     parser.add_argument(
+        "--imshow_batch",
+        type=bool,
+        default=False,
+        help="True displays batch images when loading dataset and predicting. "
+        "Default: False")
+    parser.add_argument(
         "--cuda",
         type=bool,
         default=True,

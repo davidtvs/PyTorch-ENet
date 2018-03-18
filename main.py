@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
+from torch.autograd import Variable
 
 import transforms as ext_transforms
 from models.enet import ENet
@@ -74,15 +75,15 @@ def load_dataset(dataset):
         num_workers=args.workers)
 
     # Get encoding between pixel valus in label images and RGB colors
-    encoding = train_set.color_encoding
+    class_encoding = train_set.color_encoding
 
     # Remove the road_marking class from the CamVid dataset as it's merged
     # with the road class
     if args.dataset.lower() == 'camvid':
-        del encoding['road_marking']
+        del class_encoding['road_marking']
 
     # Get number of classes to predict
-    num_classes = len(encoding)
+    num_classes = len(class_encoding)
 
     # Print information for debugging
     print("Number of classes to predict:", num_classes)
@@ -96,15 +97,16 @@ def load_dataset(dataset):
         images, labels = iter(train_loader).next()
     print("Image size:", images.size())
     print("Label size:", labels.size())
-    print("Class-color encoding:", encoding)
-    print("Close the figure window to continue...")
+    print("Class-color encoding:", class_encoding)
 
     # Show a batch of samples and labels
-    label_to_rgb = transforms.Compose(
-        [ext_transforms.LongTensorToRGBPIL(encoding),
-         transforms.ToTensor()])
-    color_labels = utils.batch_transform(labels, label_to_rgb)
-    utils.imshow_batch(images, color_labels)
+    if args.imshow_batch:
+        print("Close the figure window to continue...")
+        label_to_rgb = transforms.Compose(
+            [ext_transforms.LongTensorToRGBPIL(class_encoding),
+             transforms.ToTensor()])
+        color_labels = utils.batch_transform(labels, label_to_rgb)
+        utils.imshow_batch(images, color_labels)
 
     # Get class weights from the selected weighing technique
     print("\nWeighing technique:", args.weighing)
@@ -129,7 +131,7 @@ def load_dataset(dataset):
 
     print("Class weights:", class_weights)
 
-    return (train_loader, val_loader, test_loader), class_weights, encoding
+    return (train_loader, val_loader, test_loader), class_weights, class_encoding
 
 
 def train(train_loader, val_loader, class_weights, class_encoding):
@@ -233,6 +235,31 @@ def test(model, test_loader, class_weights, class_encoding):
     # Print per class IoU
     for key, class_iou in zip(class_encoding.keys(), iou):
         print("{0}: {1:.4f}".format(key, class_iou))
+
+    # Show a batch of samples and labels
+    if args.imshow_batch:
+        print("A batch of predictions from the test set...")
+        images, _ = iter(test_loader).next()
+        predict(model, images, class_encoding)
+
+
+def predict(model, images, class_encoding):
+    images = Variable(images)
+    if use_cuda:
+        images = images.cuda()
+
+    # Make predictions!
+    predictions = model(images)
+
+    # Predictions is one-hot encoded with "num_classes" channels.
+    # Convert it to a single int using the indices where the maximum (1) occurs
+    _, predictions = torch.max(predictions.data, 1)
+
+    label_to_rgb = transforms.Compose(
+                [ext_transforms.LongTensorToRGBPIL(class_encoding),
+                 transforms.ToTensor()])
+    color_predictions = utils.batch_transform(predictions.cpu(), label_to_rgb)
+    utils.imshow_batch(images.data.cpu(), color_predictions)
 
 
 # Run only if this module is being run directly

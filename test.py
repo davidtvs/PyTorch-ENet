@@ -6,7 +6,7 @@ class Test():
     data loader, and loss criterion.
 
     Keyword arguments:
-    - model (``nn.Module``): the model instance to train.
+    - model (``nn.Module``): the model instance to test.
     - data_loader (``Dataloader``): Provides single or multi-process
     iterators over the dataset.
     - criterion (``Optimizer``): The loss criterion.
