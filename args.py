@@ -88,8 +88,8 @@ def get_arguments():
     parser.add_argument(
         "--workers",
         type=int,
-        default=8,
-        help="Number of subprocesses to use for data loading. Default: 8")
+        default=4,
+        help="Number of subprocesses to use for data loading. Default: 4")
     parser.add_argument(
         "--print_step",
         type=bool,
@@ -106,11 +106,11 @@ def get_arguments():
         "--name",
         type=str,
         default='ENet',
-        help="Name given to the model when saving.")
+        help="Name given to the model when saving. Default: ENet")
     parser.add_argument(
         "--save_dir",
         type=str,
         default='save',
-        help="The directory where models are saved.")
+        help="The directory where models are saved. Default: save")
 
     return parser.parse_args()
