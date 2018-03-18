@@ -77,12 +77,18 @@ def save_checkpoint(model, optimizer, epoch, miou, args):
     torch.save(checkpoint, model_path)
 
     # Save arguments
-    arg_filename = os.path.join(save_dir, name + '_args.txt')
-    with open(arg_filename, 'w') as arg_file:
+    summary_filename = os.path.join(save_dir, name + '_summary.txt')
+    with open(summary_filename, 'w') as summary_file:
         sorted_args = sorted(vars(args))
+        summary_file.write("ARGUMENTS\n")
         for arg in sorted_args:
             arg_str = "{0}: {1}\n".format(arg, getattr(args, arg))
-            arg_file.write(arg_str)
+            summary_file.write(arg_str)
+
+        summary_file.write("\BEST VALIDATION\n")
+        summary_file.write("Epoch: {0}\n". format(epoch))
+        summary_file.write("Mean IoU: {0}\n". format(miou))
+
 
 
 def load_checkpoint(model, optimizer, folder_dir, filename):
