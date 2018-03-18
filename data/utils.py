@@ -102,7 +102,8 @@ def enet_weighing(dataloader, num_classes, c=1.02):
     References: https://arxiv.org/abs/1606.02147
 
     Keyword arguments:
-    - dataloader (``data.Dataloader``): A data loader to iterate over the dataset.
+    - dataloader (``data.Dataloader``): A data loader to iterate over the
+    dataset.
     - num_classes (``int``): The number of classes.
     - c (``int``, optional): AN additional hyper-parameter which restricts
     the interval of values for the weights. Default: 1.02.
@@ -139,7 +140,8 @@ def median_freq_balancing(dataloader, num_classes):
     median_freq is the median of freq_class.
 
     Keyword arguments:
-    - dataloader (``data.Dataloader``): A data loader to iterate over the dataset.
+    - dataloader (``data.Dataloader``): A data loader to iterate over the
+    dataset.
     whose weights are going to be computed.
     - num_classes (``int``): The number of classes
 

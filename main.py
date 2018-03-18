@@ -3,6 +3,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.optim.lr_scheduler as lr_scheduler
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from torch.autograd import Variable
@@ -102,9 +103,10 @@ def load_dataset(dataset):
     # Show a batch of samples and labels
     if args.imshow_batch:
         print("Close the figure window to continue...")
-        label_to_rgb = transforms.Compose(
-            [ext_transforms.LongTensorToRGBPIL(class_encoding),
-             transforms.ToTensor()])
+        label_to_rgb = transforms.Compose([
+            ext_transforms.LongTensorToRGBPIL(class_encoding),
+            transforms.ToTensor()
+        ])
         color_labels = utils.batch_transform(labels, label_to_rgb)
         utils.imshow_batch(images, color_labels)
 
@@ -131,7 +133,8 @@ def load_dataset(dataset):
 
     print("Class weights:", class_weights)
 
-    return (train_loader, val_loader, test_loader), class_weights, class_encoding
+    return (train_loader, val_loader,
+            test_loader), class_weights, class_encoding
 
 
 def train(train_loader, val_loader, class_weights, class_encoding):
@@ -154,6 +157,10 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         model.parameters(),
         lr=args.learning_rate,
         weight_decay=args.weight_decay)
+
+    # Learning rate decay scheduler
+    lr_updater = lr_scheduler.StepLR(optimizer, args.lr_decay_epochs,
+                                     args.lr_decay)
 
     # Evaluation metrics
     metrics = IoU(num_classes)
@@ -179,6 +186,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
     for epoch in range(start_epoch, args.epochs):
         print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
+        lr_updater.step()
         epoch_loss = train.run_epoch(args.print_step)
 
         print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f}".format(
@@ -255,9 +263,10 @@ def predict(model, images, class_encoding):
     # Convert it to a single int using the indices where the maximum (1) occurs
     _, predictions = torch.max(predictions.data, 1)
 
-    label_to_rgb = transforms.Compose(
-                [ext_transforms.LongTensorToRGBPIL(class_encoding),
-                 transforms.ToTensor()])
+    label_to_rgb = transforms.Compose([
+        ext_transforms.LongTensorToRGBPIL(class_encoding),
+        transforms.ToTensor()
+    ])
     color_predictions = utils.batch_transform(predictions.cpu(), label_to_rgb)
     utils.imshow_batch(images.data.cpu(), color_predictions)
 
