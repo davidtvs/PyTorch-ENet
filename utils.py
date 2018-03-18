@@ -85,10 +85,9 @@ def save_checkpoint(model, optimizer, epoch, miou, args):
             arg_str = "{0}: {1}\n".format(arg, getattr(args, arg))
             summary_file.write(arg_str)
 
-        summary_file.write("\BEST VALIDATION\n")
+        summary_file.write("\nBEST VALIDATION\n")
         summary_file.write("Epoch: {0}\n". format(epoch))
         summary_file.write("Mean IoU: {0}\n". format(miou))
-
 
 
 def load_checkpoint(model, optimizer, folder_dir, filename):
