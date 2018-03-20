@@ -1,0 +1,25 @@
+ARGUMENTS
+batch_size: 2
+cuda: True
+dataset: cityscapes
+dataset_dir: /media/davidtvs/Storage/Datasets/Cityscapes
+epochs: 300
+height: 512
+ignore_unlabelled: True
+imshow_batch: True
+learning_rate: 0.0005
+lr_decay: 0.5
+lr_decay_epochs: 25
+mode: train
+name: ENet
+print_step: False
+resume: True
+save_dir: save/ENet_Cityscapes
+weighing: ENet
+weight_decay: 0.0002
+width: 1024
+workers: 4
+
+BEST VALIDATION
+Epoch: 290
+Mean IoU: 0.4234741327158506

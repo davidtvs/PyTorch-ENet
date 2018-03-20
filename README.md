@@ -2,7 +2,20 @@
 
 PyTorch implementation of [*ENet: A Deep Neural Network Architecture for Real-Time Semantic Segmentation*](https://arxiv.org/abs/1606.02147), ported from the lua-torch implementation [ENet-training](https://github.com/e-lab/ENet-training) created by the authors.
 
-This implementation has been tested on the CamVid and Cityscapes datasets. Currently, a pre-trained version of the model trained in CamVid is available. A pre-trained model in Cityscapes will be made available in the future.
+This implementation has been tested on the CamVid and Cityscapes datasets. Currently, a pre-trained version of the model trained in CamVid and Cityscapes is available.
+
+|                                Dataset                               | Classes <sup>1</sup> | Input resolution | Batch size | Epochs |    Mean IoU (%)   | GPU memory (GiB) | Training time (hours)<sup>2</sup> |
+|:--------------------------------------------------------------------:|:--------------------:|:----------------:|:----------:|:------:|:-----------------:|:----------------:|:---------------------------------:|
+| [CamVid](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/) |          11          |      480x360     |     10     |   300  | 42.48<sup>3</sup> |        7.4       |                 1                 |
+|           [Cityscapes](https://www.cityscapes-dataset.com/)          |          19          |     1024x512     |      2     |   300  | 42.35<sup>4</sup> |        4.3       |                 25                |
+
+<sup>1</sup> When referring to the number of classes, the void/unlabelled class is always excluded.
+
+<sup>2</sup> These are just for reference. Implementation, datasets, and hardware changes can lead to very different results. Reference hardware: Nvidia GTX 1070 and an Intel Core i5-4570 3.2GHz.
+
+<sup>3</sup> Test set.
+
+<sup>4</sup> Validation set.
 
 
 ## Installation
@@ -53,7 +66,7 @@ python main.py -m test --save_dir save/folder/ --name model_name --dataset name 
 ```
 
 
-## Project struture
+## Project structure
 
 ### Folders
 
@@ -61,7 +74,7 @@ python main.py -m test --save_dir save/folder/ --name model_name --dataset name 
 - [``metric``](https://github.com/davidtvs/PyTorch-ENet/tree/master/metric): Evaluation-related metrics.
 - [``models``](https://github.com/davidtvs/PyTorch-ENet/tree/master/models):
 ENet model definition.
-- [``save``](https://github.com/davidtvs/PyTorch-ENet/tree/master/save): By default, ``main.py`` will save models in this folder. The pretrained models can also be found here.
+- [``save``](https://github.com/davidtvs/PyTorch-ENet/tree/master/save): By default, ``main.py`` will save models in this folder. The pre-trained models can also be found here.
 
 ### Files
 
