@@ -10,7 +10,7 @@ This implementation has been tested on the CamVid and Cityscapes datasets. Curre
 |           [Cityscapes](https://www.cityscapes-dataset.com/)          |          19          |     1024x512     |      2     |   300  | 42.35<sup>4</sup> |        4.3       |                 25                |
 
 <sup>1</sup> When referring to the number of classes, the void/unlabelled class is always excluded.<br/>
-<sup>2</sup> These are just for reference. Implementation, datasets, and hardware changes can lead to very different results. Reference hardware: Nvidia GTX 1070 and an Intel Core i5-4570 3.2GHz.<br/>
+<sup>2</sup> Just for reference since implementation, datasets, and hardware changes can lead to very different results. Reference hardware: Nvidia GTX 1070 and an Intel Core i5-4570 3.2GHz.<br/>
 <sup>3</sup> Test set.<br/>
 <sup>4</sup> Validation set.
 
@@ -24,7 +24,7 @@ This implementation has been tested on the CamVid and Cityscapes datasets. Curre
 
 ## Usage
 
-Run [``main.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/main.py) main script file used for training and/or testing the model. The following options are supported:
+Run [``main.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/main.py), the main script file used for training and/or testing the model. The following options are supported:
 
 ```
 python main.py [-h] [--mode {train,test,full}] [--resume RESUME]
