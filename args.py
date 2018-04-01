@@ -45,14 +45,14 @@ def get_arguments():
     parser.add_argument(
         "--lr_decay",
         type=float,
-        default=0.5,
+        default=0.1,
         help="The learning rate decay factor. Default: 0.5")
     parser.add_argument(
         "--lr_decay_epochs",
         type=int,
-        default=25,
+        default=100,
         help="The number of epochs before adjusting the learning rate. "
-        "Default: 25")
+        "Default: 100")
     parser.add_argument(
         "--weight_decay",
         "-wd",
