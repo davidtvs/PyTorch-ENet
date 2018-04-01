@@ -20,6 +20,8 @@ class IoU(metric.Metric):
     """
 
     def __init__(self, k, normalized=False):
+        super().__init__()
+
         self.conf_metric = MultiLabelConfusionMatrix(
             k, normalized=normalized)
 

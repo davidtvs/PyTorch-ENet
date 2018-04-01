@@ -10,16 +10,17 @@ class Test():
     - data_loader (``Dataloader``): Provides single or multi-process
     iterators over the dataset.
     - criterion (``Optimizer``): The loss criterion.
-    - metrics (): An instance specifying the metrics to return.
+    - metric (```Metric``): An instance specifying the metric to return.
     - use_cuda (``bool``): If ``True``, the training is performed using
     CUDA operations (GPU).
 
     """
-    def __init__(self, model, data_loader, criterion, metrics, use_cuda):
+
+    def __init__(self, model, data_loader, criterion, metric, use_cuda):
         self.model = model
         self.data_loader = data_loader
         self.criterion = criterion
-        self.metrics = metrics
+        self.metric = metric
         self.use_cuda = use_cuda
 
     def run_epoch(self, iteration_loss=False):
@@ -33,7 +34,7 @@ class Test():
 
         """
         epoch_loss = 0.0
-        self.metrics.reset()
+        self.metric.reset()
         for step, batch_data in enumerate(self.data_loader):
             # Get the inputs and labels
             inputs, labels = batch_data
@@ -53,10 +54,10 @@ class Test():
             # Keep track of loss for current epoch
             epoch_loss += loss.data[0]
 
-            # Keep track of evaluation metrics
-            self.metrics.add(outputs.data, labels.data)
+            # Keep track of evaluation the metric
+            self.metric.add(outputs.data, labels.data)
 
             if iteration_loss:
                 print("[Step: %d] Iteration loss: %.4f" % (step, loss.data[0]))
 
-        return epoch_loss / len(self.data_loader), self.metrics.value()
+        return epoch_loss / len(self.data_loader), self.metric.value()

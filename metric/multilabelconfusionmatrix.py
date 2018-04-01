@@ -17,6 +17,8 @@ class MultiLabelConfusionMatrix(metric.Metric):
     """
 
     def __init__(self, k, normalized=False):
+        super().__init__()
+
         self.confusion = ConfusionMatrix(k, normalized)
         self.normalized = normalized
         self.k = k

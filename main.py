@@ -162,8 +162,8 @@ def train(train_loader, val_loader, class_weights, class_encoding):
     lr_updater = lr_scheduler.StepLR(optimizer, args.lr_decay_epochs,
                                      args.lr_decay)
 
-    # Evaluation metrics
-    metrics = IoU(num_classes)
+    # Evaluation metric
+    metric = IoU(num_classes)
 
     if use_cuda:
         model = model.cuda()
@@ -181,16 +181,16 @@ def train(train_loader, val_loader, class_weights, class_encoding):
 
     # Start Training
     print()
-    train = Train(model, train_loader, optimizer, criterion, use_cuda)
-    val = Test(model, val_loader, criterion, metrics, use_cuda)
+    train = Train(model, train_loader, optimizer, criterion, metric, use_cuda)
+    val = Test(model, val_loader, criterion, metric, use_cuda)
     for epoch in range(start_epoch, args.epochs):
         print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
         lr_updater.step()
-        epoch_loss = train.run_epoch(args.print_step)
+        epoch_loss, (iou, miou) = train.run_epoch(args.print_step)
 
-        print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f}".format(
-            epoch, epoch_loss))
+        print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
+              format(epoch, epoch_loss, miou))
 
         if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
             print(">>>> [Epoch: {0:d}] Validation".format(epoch))
@@ -227,11 +227,11 @@ def test(model, test_loader, class_weights, class_encoding):
     if use_cuda:
         criterion = criterion.cuda()
 
-    # Evaluation metrics
-    metrics = IoU(num_classes)
+    # Evaluation metric
+    metric = IoU(num_classes)
 
     # Test the trained model on the test set
-    test = Test(model, test_loader, criterion, metrics, use_cuda)
+    test = Test(model, test_loader, criterion, metric, use_cuda)
 
     print(">>>> Running test dataset")
 
