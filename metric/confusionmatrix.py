@@ -56,7 +56,7 @@ class ConfusionMatrix(metric.Metric):
             predicted = np.argmax(predicted, 1)
         else:
             assert (predicted.max() < self.k) and (predicted.min() >= 0), \
-                'predicted values are not between 1 and k'
+                'predicted values are not between 0 and k-1'
 
         onehot_target = np.ndim(target) != 1
         if onehot_target:
@@ -68,8 +68,8 @@ class ConfusionMatrix(metric.Metric):
                 'multi-label setting is not supported'
             target = np.argmax(target, 1)
         else:
-            assert (predicted.max() < self.k) and (predicted.min() >= 0), \
-                'predicted values are not between 0 and k-1'
+            assert (target.max() < self.k) and (target.min() >= 0), \
+                'target values are not between 0 and k-1'
 
         # hack for bincounting 2 arrays together
         x = predicted + self.k * target

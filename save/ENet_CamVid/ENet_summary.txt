@@ -8,8 +8,8 @@ height: 360
 ignore_unlabelled: True
 imshow_batch: True
 learning_rate: 0.0005
-lr_decay: 0.5
-lr_decay_epochs: 50
+lr_decay: 0.1
+lr_decay_epochs: 100
 mode: full
 name: ENet
 print_step: False
@@ -21,5 +21,5 @@ width: 480
 workers: 4
 
 BEST VALIDATION
-Epoch: 190
-Mean IoU: 0.5501277003407142
+Epoch: 240
+Mean IoU: 0.5470011527830091
