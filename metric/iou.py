@@ -1,6 +1,7 @@
+import torch
 import numpy as np
 from metric import metric
-from metric.multilabelconfusionmatrix import MultiLabelConfusionMatrix
+from metric.confusionmatrix import ConfusionMatrix
 
 
 class IoU(metric.Metric):
@@ -14,16 +15,14 @@ class IoU(metric.Metric):
         IoU = true_positive / (true_positive + false_positive + false_negative).
 
     Keyword arguments:
-    - k (int): number of classes in the classification problem
+    - num_classes (int): number of classes in the classification problem
     - normalized (boolean, optional): Determines whether or not the confusion
     matrix is normalized or not. Default: False.
     """
 
-    def __init__(self, k, normalized=False):
+    def __init__(self, num_classes, normalized=False):
         super().__init__()
-
-        self.conf_metric = MultiLabelConfusionMatrix(
-            k, normalized=normalized)
+        self.conf_metric = ConfusionMatrix(num_classes, normalized)
 
     def reset(self):
         self.conf_metric.reset()
@@ -33,15 +32,29 @@ class IoU(metric.Metric):
         Computes the intersection over union for K classes.
 
         Keyword arguments:
-        - predicted (tensor or numpy.ndarray): Can be a (N, K, H, W) tensor of
+        - predicted (Tensor): Can be a (N, K, H, W) tensor of
         predicted scores obtained from the model for N examples and K classes,
         or (N, H, W) tensor of integer values between 0 and K-1.
-        - target (tensor or numpy.ndarray): Can be a (N, K, H, W) tensor of
+        - target (Tensor): Can be a (N, K, H, W) tensor of
         target scores for N examples and K classes, or (N, H, W) tensor of
         integer values between 0 and K-1.
 
         """
-        self.conf_metric.add(predicted, target)
+        # Dimensions check
+        assert predicted.size(0) == target.size(0), \
+            'number of targets and predicted outputs do not match'
+        assert predicted.dim() == 3 or predicted.dim() == 4, \
+            "predictions must be of dimension (N, H, W) or (N, K, H, W)"
+        assert target.dim() == 3 or target.dim() == 4, \
+            "targets must be of dimension (N, H, W) or (N, K, H, W)"
+
+        # If the tensor is in categorical format convert it to integer format
+        if predicted.dim() == 4:
+            _, predicted = predicted.max(1)
+        if target.dim() == 4:
+            _, target = target.max(1)
+
+        self.conf_metric.add(predicted.view(-1), target.view(-1))
 
     def value(self):
         """
