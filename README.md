@@ -70,14 +70,13 @@ python main.py -m test --save_dir save/folder/ --name model_name --dataset name 
 
 - [``data``](https://github.com/davidtvs/PyTorch-ENet/tree/master/data): Contains code to load the supported datasets.
 - [``metric``](https://github.com/davidtvs/PyTorch-ENet/tree/master/metric): Evaluation-related metrics.
-- [``models``](https://github.com/davidtvs/PyTorch-ENet/tree/master/models):
-ENet model definition.
+- [``models``](https://github.com/davidtvs/PyTorch-ENet/tree/master/models): ENet model definition.
 - [``save``](https://github.com/davidtvs/PyTorch-ENet/tree/master/save): By default, ``main.py`` will save models in this folder. The pre-trained models can also be found here.
 
 ### Files
 
-- [``args.py``](https://github.com/davidtvs/PyTorch-ENet/tree/master/args): Contains all command-line options.
-- [``main.py``](https://github.com/davidtvs/PyTorch-ENet/tree/master/main): Main script file used for training and/or testing the model.
-- [``test.py``](https://github.com/davidtvs/PyTorch-ENet/tree/master/test): Defines the ``Test`` class which is responsible for testing the model.
-- [``train.py``](https://github.com/davidtvs/PyTorch-ENet/tree/master/train): Defines the ``Train`` class which is responsible for training the model.
-- [``transforms.py``](https://github.com/davidtvs/PyTorch-ENet/tree/master/transforms): Defines image transformations to convert an RGB image encoding classes to a ``torch.LongTensor`` and vice versa.
+- [``args.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/args.py): Contains all command-line options.
+- [``main.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/main.py): Main script file used for training and/or testing the model.
+- [``test.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/test.py): Defines the ``Test`` class which is responsible for testing the model.
+- [``train.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/train.py): Defines the ``Train`` class which is responsible for training the model.
+- [``transforms.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/transforms.py): Defines image transformations to convert an RGB image encoding classes to a ``torch.LongTensor`` and vice versa.
