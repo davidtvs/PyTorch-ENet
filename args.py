@@ -88,12 +88,6 @@ def get_arguments():
         default='ENet',
         help="The class weighing technique to apply to the dataset. "
         "Default: enet")
-    parser.add_argument(
-        "--ignore_unlabeled",
-        type=bool,
-        default=True,
-        help="If True, the unlabeled class weight is ignored (set to 0); "
-        "otherwise, it's kept as computed. Default: True")
 
     # Settings
     parser.add_argument(
@@ -129,5 +123,27 @@ def get_arguments():
         type=str,
         default='save',
         help="The directory where models are saved. Default: save")
+
+    # Mutually exclusive groups
+    exclusive_group = parser.add_mutually_exclusive_group(required=False)
+    exclusive_group.add_argument(
+        "--unlabeled",
+        dest='ignore_unlabeled',
+        action='store_false',
+        help=(
+            "The unlabeled class is not ignored"
+        )
+    )
+    exclusive_group.add_argument(
+        "--no-unlabeled",
+        dest='ignore_unlabeled',
+        action='store_true',
+        help=(
+            "The unlabeled class is ignored"
+        )
+    )
+
+    # Set a default for so we don't have to always specify one or the other
+    parser.set_defaults(ignore_unlabeled=True)
 
     return parser.parse_args()
