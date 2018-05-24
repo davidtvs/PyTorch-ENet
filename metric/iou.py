@@ -67,5 +67,12 @@ class IoU(metric.Metric):
         true_positive = np.diag(conf_matrix)
         false_positive = np.sum(conf_matrix, 0) - true_positive
         false_negative = np.sum(conf_matrix, 1) - true_positive
-        iou = true_positive / (true_positive + false_positive + false_negative)
+
+        # Just in case we get a division by 0, ignore/hide the error and
+        # set the value to 1 since we predicted 0 pixels for that class and
+        # and the batch has 0 pixels for that same class
+        with np.errstate(divide='ignore', invalid='ignore'):
+            iou = true_positive / (true_positive + false_positive + false_negative)
+        iou[np.isnan(iou)] = 1
+
         return iou, np.nanmean(iou)
