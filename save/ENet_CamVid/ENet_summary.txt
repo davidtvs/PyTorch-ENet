@@ -5,7 +5,7 @@ dataset: camvid
 dataset_dir: data/CamVid
 epochs: 300
 height: 360
-ignore_unlabelled: True
+ignore_unlabeled: True
 imshow_batch: True
 learning_rate: 0.0005
 lr_decay: 0.1

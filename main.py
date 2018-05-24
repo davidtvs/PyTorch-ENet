@@ -124,8 +124,8 @@ def load_dataset(dataset):
 
     if class_weights is not None:
         class_weights = torch.from_numpy(class_weights).float()
-        # Handle unlabelled class
-        if args.ignore_unlabelled:
+        # Handle unlabeled class
+        if args.ignore_unlabeled:
             if args.dataset.lower() == 'camvid':
                 class_weights[-1] = 0
             elif args.dataset.lower() == 'cityscapes':

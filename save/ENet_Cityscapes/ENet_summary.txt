@@ -5,7 +5,7 @@ dataset: cityscapes
 dataset_dir: /media/davidtvs/Storage/Datasets/Cityscapes/1024x512
 epochs: 300
 height: 512
-ignore_unlabelled: True
+ignore_unlabeled: True
 imshow_batch: True
 learning_rate: 0.0005
 lr_decay: 0.1

@@ -50,7 +50,7 @@ class CamVid(data.Dataset):
         ('car', (64, 0, 128)),
         ('pedestrian', (64, 64, 0)),
         ('bicyclist', (0, 128, 192)),
-        ('unlabelled', (0, 0, 0))
+        ('unlabeled', (0, 0, 0))
     ])
 
     def __init__(self,
