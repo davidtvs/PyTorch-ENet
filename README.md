@@ -28,16 +28,15 @@ This implementation has been tested on the CamVid and Cityscapes datasets. Curre
 Run [``main.py``](https://github.com/davidtvs/PyTorch-ENet/blob/master/main.py), the main script file used for training and/or testing the model. The following options are supported:
 
 ```
-python main.py [-h] [--mode {train,test,full}] [--resume RESUME]
-               [--batch_size BATCH_SIZE] [--epochs EPOCHS]
-               [--learning_rate LEARNING_RATE] [--lr_decay LR_DECAY]
-               [--lr_decay_epochs LR_DECAY_EPOCHS]
-               [--weight_decay WEIGHT_DECAY] [--dataset {camvid,cityscapes}]
-               [--dataset_dir DATASET_DIR] [--height HEIGHT] [--width WIDTH]
-               [--weighing {enet,mfb,none}]
-               [--ignore_unlabeled IGNORE_UNLABELLED] [--workers WORKERS]
-               [--print_step PRINT_STEP] [--imshow_batch IMSHOW_BATCH]
-               [--cuda CUDA] [--name NAME] [--save_dir SAVE_DIR]
+python main.py [-h] [--mode {train,test,full}] [--resume]
+               [--batch-size BATCH_SIZE] [--epochs EPOCHS]
+               [--learning-rate LEARNING_RATE] [--lr-decay LR_DECAY]
+               [--lr-decay-epochs LR_DECAY_EPOCHS]
+               [--weight-decay WEIGHT_DECAY] [--dataset {camvid,cityscapes}]
+               [--dataset-dir DATASET_DIR] [--height HEIGHT] [--width WIDTH]
+               [--weighing {enet,mfb,none}] [--with-unlabeled]
+               [--workers WORKERS] [--print-step] [--imshow-batch]
+               [--no-cuda CUDA] [--name NAME] [--save-dir SAVE_DIR]
 ```
 
 For help on the optional arguments run: ``python main.py -h``
@@ -46,21 +45,21 @@ For help on the optional arguments run: ``python main.py -h``
 ### Examples: Training
 
 ```
-python main.py -m train --save_dir save/folder/ --name model_name --dataset name --dataset_dir path/root_directory/
+python main.py -m train --save-dir save/folder/ --name model_name --dataset name --dataset-dir path/root_directory/
 ```
 
 
 ### Examples: Resuming training
 
 ```
-python main.py -m train --resume True --save_dir save/folder/ --name model_name --dataset name --dataset_dir path/root_directory/
+python main.py -m train --resume True --save-dir save/folder/ --name model_name --dataset name --dataset-dir path/root_directory/
 ```
 
 
 ### Examples: Testing
 
 ```
-python main.py -m test --save_dir save/folder/ --name model_name --dataset name --dataset_dir path/root_directory/
+python main.py -m test --save-dir save/folder/ --name model_name --dataset name --dataset-dir path/root_directory/
 ```
 
 
