@@ -20,7 +20,7 @@ class IoU(metric.Metric):
     matrix is normalized or not. Default: False.
     """
 
-    def __init__(self, num_classes, ignore_index=None, normalized=False):
+    def __init__(self, num_classes, normalized=False, ignore_index=None):
         super().__init__()
         self.conf_metric = ConfusionMatrix(num_classes, normalized)
 
@@ -81,14 +81,6 @@ class IoU(metric.Metric):
         true_positive = np.diag(conf_matrix)
         false_positive = np.sum(conf_matrix, 0) - true_positive
         false_negative = np.sum(conf_matrix, 1) - true_positive
-
-        np.set_printoptions(precision=2, linewidth=200)
-        print()
-        print()
-        print(str(conf_matrix))
-        print()
-        print()
-        np.set_printoptions(edgeitems=3,infstr='inf', linewidth=75, nanstr='nan', precision=8, suppress=False, threshold=1000, formatter=None)
 
         # Just in case we get a division by 0, ignore/hide the error
         with np.errstate(divide='ignore', invalid='ignore'):
