@@ -22,4 +22,4 @@ workers: 4
 
 BEST VALIDATION
 Epoch: 240
-Mean IoU: 0.5470011527830091
+Mean IoU: 0.6114
