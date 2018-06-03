@@ -4,10 +4,9 @@ from metric import metric
 
 
 class ConfusionMatrix(metric.Metric):
-    """
-    The ConfusionMeter constructs a confusion matrix for a multi-class
-    classification problems. It does not support multi-label, multi-class
-    problems; for such problems, please use MultiLabelConfusionMeter.
+    """Constructs a confusion matrix for a multi-class classification problems.
+
+    Does not support multi-label, multi-class problems.
 
     Keyword arguments:
     - num_classes (int): number of classes in the classification problem.
@@ -29,8 +28,9 @@ class ConfusionMatrix(metric.Metric):
         self.conf.fill(0)
 
     def add(self, predicted, target):
-        """
-        Computes the confusion matrix of K x K size where K is the number
+        """Computes the confusion matrix
+
+        The shape of the confusion matrix is K x K, where K is the number
         of classes.
 
         Keyword arguments:

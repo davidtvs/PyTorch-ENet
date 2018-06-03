@@ -18,6 +18,8 @@ class IoU(metric.Metric):
     - num_classes (int): number of classes in the classification problem
     - normalized (boolean, optional): Determines whether or not the confusion
     matrix is normalized or not. Default: False.
+    - ignore_index (int or iterable, optional): Index of the classes to ignore
+    when computing the IoU. Can be an int, or any iterable of ints.
     """
 
     def __init__(self, num_classes, normalized=False, ignore_index=None):
@@ -38,8 +40,7 @@ class IoU(metric.Metric):
         self.conf_metric.reset()
 
     def add(self, predicted, target):
-        """
-        Computes the intersection over union for K classes.
+        """Adds the predicted and target pair to the IoU metric.
 
         Keyword arguments:
         - predicted (Tensor): Can be a (N, K, H, W) tensor of
@@ -67,9 +68,12 @@ class IoU(metric.Metric):
         self.conf_metric.add(predicted.view(-1), target.view(-1))
 
     def value(self):
-        """
+        """Computes the IoU and mean IoU.
+
+        The mean computation ignores NaN elements of the IoU array.
+
         Returns:
-            Per class IoU and mean IoU. The first output is the per class IoU,
+            Tuple: (IoU, mIoU). The first output is the per class IoU,
             for K classes it's numpy.ndarray with K elements. The second output,
             is the mean IoU.
         """
