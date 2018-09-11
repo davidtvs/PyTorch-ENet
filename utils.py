@@ -1,5 +1,4 @@
 import torch
-import torch.functional as F
 import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,12 +15,12 @@ def batch_transform(batch, transform):
     """
 
     # Convert the single channel label to RGB in tensor form
-    # 1. F.unbind removes the 0-dimension of "labels" and returns a tuple of
+    # 1. torch.unbind removes the 0-dimension of "labels" and returns a tuple of
     # all slices along that dimension
     # 2. the transform is applied to each slice
-    transf_slices = [transform(tensor) for tensor in F.unbind(batch)]
+    transf_slices = [transform(tensor) for tensor in torch.unbind(batch)]
 
-    return F.stack(transf_slices)
+    return torch.stack(transf_slices)
 
 
 def imshow_batch(images, labels):
