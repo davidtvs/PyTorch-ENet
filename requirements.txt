@@ -6,7 +6,6 @@ Pillow==5.0.0
 pyparsing==2.2.0
 python-dateutil==2.7.0
 pytz==2018.3
-PyYAML==3.12
 six==1.11.0
 torch==0.3.1
 torchvision==0.2.0
