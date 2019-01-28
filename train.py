@@ -1,6 +1,3 @@
-from torch.autograd import Variable
-
-
 class Train:
     """Performs the training of ``model`` given a training dataset data
     loader, the optimizer, and the loss criterion.
@@ -40,9 +37,6 @@ class Train:
         for step, batch_data in enumerate(self.data_loader):
             # Get the inputs and labels
             inputs, labels = batch_data
-
-            # Wrap them in a Varaible
-            inputs, labels = Variable(inputs), Variable(labels)
             if self.use_cuda:
                 inputs = inputs.cuda()
                 labels = labels.cuda()

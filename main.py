@@ -6,7 +6,6 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 import torch.utils.data as data
 import torchvision.transforms as transforms
-from torch.autograd import Variable
 
 import transforms as ext_transforms
 from models.enet import ENet
@@ -258,7 +257,6 @@ def test(model, test_loader, class_weights, class_encoding):
 
 
 def predict(model, images, class_encoding):
-    images = Variable(images)
     if use_cuda:
         images = images.cuda()
 

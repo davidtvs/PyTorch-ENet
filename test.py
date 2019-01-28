@@ -1,6 +1,3 @@
-from torch.autograd import Variable
-
-
 class Test:
     """Tests the ``model`` on the specified test dataset using the
     data loader, and loss criterion.
@@ -39,9 +36,6 @@ class Test:
         for step, batch_data in enumerate(self.data_loader):
             # Get the inputs and labels
             inputs, labels = batch_data
-
-            # Wrap them in a Varaible
-            inputs, labels = Variable(inputs), Variable(labels)
             if self.use_cuda:
                 inputs = inputs.cuda()
                 labels = labels.cuda()
