@@ -1,3 +1,6 @@
+import torch
+
+
 class Test:
     """Tests the ``model`` on the specified test dataset using the
     data loader, and loss criterion.
@@ -38,11 +41,12 @@ class Test:
             inputs = batch_data[0].to(self.device)
             labels = batch_data[1].to(self.device)
 
-            # Forward propagation
-            outputs = self.model(inputs)
+            with torch.no_grad():
+                # Forward propagation
+                outputs = self.model(inputs)
 
-            # Loss computation
-            loss = self.criterion(outputs, labels)
+                # Loss computation
+                loss = self.criterion(outputs, labels)
 
             # Keep track of loss for current epoch
             epoch_loss += loss.item()
