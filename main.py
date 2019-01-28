@@ -19,7 +19,7 @@ import utils
 # Get the arguments
 args = get_arguments()
 
-use_cuda = args.cuda and torch.cuda.is_available()
+device = torch.device(args.device)
 
 
 def load_dataset(dataset):
@@ -122,7 +122,7 @@ def load_dataset(dataset):
         class_weights = None
 
     if class_weights is not None:
-        class_weights = torch.from_numpy(class_weights).float()
+        class_weights = torch.from_numpy(class_weights).float().to(device)
         # Set the weight of the unlabeled class to 0
         if args.ignore_unlabeled:
             ignore_index = list(class_encoding).index('unlabeled')
@@ -140,7 +140,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
     num_classes = len(class_encoding)
 
     # Intialize ENet
-    model = ENet(num_classes)
+    model = ENet(num_classes).to(device)
     # Check if the network architecture is correct
     print(model)
 
@@ -166,10 +166,6 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         ignore_index = None
     metric = IoU(num_classes, ignore_index=ignore_index)
 
-    if use_cuda:
-        model = model.cuda()
-        criterion = criterion.cuda()
-
     # Optionally resume from a checkpoint
     if args.resume:
         model, optimizer, start_epoch, best_miou = utils.load_checkpoint(
@@ -182,8 +178,8 @@ def train(train_loader, val_loader, class_weights, class_encoding):
 
     # Start Training
     print()
-    train = Train(model, train_loader, optimizer, criterion, metric, use_cuda)
-    val = Test(model, val_loader, criterion, metric, use_cuda)
+    train = Train(model, train_loader, optimizer, criterion, metric, device)
+    val = Test(model, val_loader, criterion, metric, device)
     for epoch in range(start_epoch, args.epochs):
         print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
@@ -225,8 +221,6 @@ def test(model, test_loader, class_weights, class_encoding):
     # frequentely used in classification problems with multiple classes which
     # fits the problem. This criterion  combines LogSoftMax and NLLLoss.
     criterion = nn.CrossEntropyLoss(weight=class_weights)
-    if use_cuda:
-        criterion = criterion.cuda()
 
     # Evaluation metric
     if args.ignore_unlabeled:
@@ -236,7 +230,7 @@ def test(model, test_loader, class_weights, class_encoding):
     metric = IoU(num_classes, ignore_index=ignore_index)
 
     # Test the trained model on the test set
-    test = Test(model, test_loader, criterion, metric, use_cuda)
+    test = Test(model, test_loader, criterion, metric, device)
 
     print(">>>> Running test dataset")
 
@@ -257,8 +251,7 @@ def test(model, test_loader, class_weights, class_encoding):
 
 
 def predict(model, images, class_encoding):
-    if use_cuda:
-        images = images.cuda()
+    images = images.to(device)
 
     # Make predictions!
     predictions = model(images)
@@ -308,9 +301,7 @@ if __name__ == '__main__':
     elif args.mode.lower() == 'test':
         # Intialize a new ENet model
         num_classes = len(class_encoding)
-        model = ENet(num_classes)
-        if use_cuda:
-            model = model.cuda()
+        model = ENet(num_classes).to(device)
 
         # Initialize a optimizer just so we can retrieve the model from the
         # checkpoint

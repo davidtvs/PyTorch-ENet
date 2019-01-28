@@ -108,10 +108,9 @@ def get_arguments():
         help=("Displays batch images when loading the dataset and making "
               "predictions."))
     parser.add_argument(
-        "--no-cuda",
-        dest='cuda',
-        default='store_false',
-        help="CPU only.")
+        "--device",
+        default='cuda',
+        help="Device on which the network will be trained. Default: cuda")
 
     # Storage settings
     parser.add_argument(

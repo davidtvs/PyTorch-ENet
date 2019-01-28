@@ -8,17 +8,17 @@ class Test:
     iterators over the dataset.
     - criterion (``Optimizer``): The loss criterion.
     - metric (```Metric``): An instance specifying the metric to return.
-    - use_cuda (``bool``): If ``True``, the training is performed using
-    CUDA operations (GPU).
+    - device (``torch.device``): An object representing the device on which
+    tensors are allocated.
 
     """
 
-    def __init__(self, model, data_loader, criterion, metric, use_cuda):
+    def __init__(self, model, data_loader, criterion, metric, device):
         self.model = model
         self.data_loader = data_loader
         self.criterion = criterion
         self.metric = metric
-        self.use_cuda = use_cuda
+        self.device = device
 
     def run_epoch(self, iteration_loss=False):
         """Runs an epoch of validation.
@@ -35,10 +35,8 @@ class Test:
         self.metric.reset()
         for step, batch_data in enumerate(self.data_loader):
             # Get the inputs and labels
-            inputs, labels = batch_data
-            if self.use_cuda:
-                inputs = inputs.cuda()
-                labels = labels.cuda()
+            inputs = batch_data[0].to(self.device)
+            labels = batch_data[1].to(self.device)
 
             # Forward propagation
             outputs = self.model(inputs)
