@@ -1,7 +1,7 @@
 from torch.autograd import Variable
 
 
-class Train():
+class Train:
     """Performs the training of ``model`` given a training dataset data
     loader, the optimizer, and the loss criterion.
 
@@ -59,12 +59,12 @@ class Train():
             self.optim.step()
 
             # Keep track of loss for current epoch
-            epoch_loss += loss.data[0]
+            epoch_loss += loss.item()
 
             # Keep track of the evaluation metric
-            self.metric.add(outputs.data, labels.data)
+            self.metric.add(outputs.detach(), labels.detach())
 
             if iteration_loss:
-                print("[Step: %d] Iteration loss: %.4f" % (step, loss.data[0]))
+                print("[Step: %d] Iteration loss: %.4f" % (step, loss.item()))
 
         return epoch_loss / len(self.data_loader), self.metric.value()
