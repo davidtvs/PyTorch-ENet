@@ -254,7 +254,9 @@ def predict(model, images, class_encoding):
     images = images.to(device)
 
     # Make predictions!
-    predictions = model(images)
+    model.eval()
+    with torch.no_grad():
+        predictions = model(images)
 
     # Predictions is one-hot encoded with "num_classes" channels.
     # Convert it to a single int using the indices where the maximum (1) occurs
