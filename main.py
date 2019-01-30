@@ -59,7 +59,7 @@ def load_dataset(dataset):
     val_loader = data.DataLoader(
         val_set,
         batch_size=args.batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=args.workers)
 
     # Load the test set as tensors
@@ -71,7 +71,7 @@ def load_dataset(dataset):
     test_loader = data.DataLoader(
         test_set,
         batch_size=args.batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=args.workers)
 
     # Get encoding between pixel valus in label images and RGB colors
