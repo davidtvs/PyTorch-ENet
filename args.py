@@ -79,7 +79,7 @@ def get_arguments():
         "--width",
         type=int,
         default=480,
-        help="The image height. Default: 480")
+        help="The image width. Default: 480")
     parser.add_argument(
         "--weighing",
         choices=['enet', 'mfb', 'none'],
