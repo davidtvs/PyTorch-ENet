@@ -79,7 +79,7 @@ def get_arguments():
         "--width",
         type=int,
         default=480,
-        help="The image height. Default: 480")
+        help="The image width. Default: 480")
     parser.add_argument(
         "--weighing",
         choices=['enet', 'mfb', 'none'],
@@ -108,10 +108,9 @@ def get_arguments():
         help=("Displays batch images when loading the dataset and making "
               "predictions."))
     parser.add_argument(
-        "--no-cuda",
-        dest='cuda',
-        default='store_false',
-        help="CPU only.")
+        "--device",
+        default='cuda',
+        help="Device on which the network will be trained. Default: cuda")
 
     # Storage settings
     parser.add_argument(
