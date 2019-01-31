@@ -1,8 +1,8 @@
 ARGUMENTS
-batch_size: 2
-cuda: True
+batch_size: 4
 dataset: cityscapes
-dataset_dir: /media/davidtvs/Storage/Datasets/Cityscapes/1024x512
+dataset_dir: ../../Datasets/Cityscapes/1024x512/
+device: cuda
 epochs: 300
 height: 512
 ignore_unlabeled: True
@@ -14,12 +14,12 @@ mode: train
 name: ENet
 print_step: False
 resume: False
-save_dir: save/ENet_Cityscapes
+save_dir: save
 weighing: ENet
 weight_decay: 0.0002
 width: 1024
 workers: 4
 
 BEST VALIDATION
-Epoch: 260
-Mean IoU: 0.5571
+Epoch: 220
+Mean IoU: 0.59403805134811
