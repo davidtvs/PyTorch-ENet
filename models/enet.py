@@ -29,8 +29,6 @@ class InitialBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size=3,
-                 padding=0,
                  bias=False,
                  relu=True):
         super().__init__()
@@ -46,13 +44,13 @@ class InitialBlock(nn.Module):
         self.main_branch = nn.Conv2d(
             in_channels,
             out_channels - 3,
-            kernel_size=kernel_size,
+            kernel_size=3,
             stride=2,
-            padding=padding,
+            padding=1,
             bias=bias)
 
         # Extension branch
-        self.ext_branch = nn.MaxPool2d(kernel_size, stride=2, padding=padding)
+        self.ext_branch = nn.MaxPool2d(3, stride=2, padding=1)
 
         # Initialize batch normalization to be used after concatenation
         self.batch_norm = nn.BatchNorm2d(out_channels)
@@ -236,15 +234,6 @@ class DownsamplingBottleneck(nn.Module):
     used to compute the number of channels after the projection. eg. given
     ``channels`` equal to 128 and internal_ratio equal to 2 the number of
     channels after the projection is 64. Default: 4.
-    - kernel_size (int, optional): the kernel size of the filters used in
-    the convolution layer described above in item 2 of the extension branch.
-    Default: 3.
-    - padding (int, optional): zero-padding added to both sides of the
-    input. Default: 0.
-    - dilation (int, optional): spacing between kernel elements for the
-    convolution described in item 2 of the extension branch. Default: 1.
-    - asymmetric (bool, optional): flags if the convolution described in
-    item 2 of the extension branch is asymmetric or not. Default: False.
     - return_indices (bool, optional):  if ``True``, will return the max
     indices along with the outputs. Useful when unpooling later.
     - dropout_prob (float, optional): probability of an element to be
@@ -260,8 +249,6 @@ class DownsamplingBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  internal_ratio=4,
-                 kernel_size=3,
-                 padding=0,
                  return_indices=False,
                  dropout_prob=0,
                  bias=False,
@@ -287,9 +274,8 @@ class DownsamplingBottleneck(nn.Module):
 
         # Main branch - max pooling followed by feature map (channels) padding
         self.main_max1 = nn.MaxPool2d(
-            kernel_size,
+            2,
             stride=2,
-            padding=padding,
             return_indices=return_indices)
 
         # Extension branch - 2x2 convolution, followed by a regular, dilated or
@@ -310,9 +296,9 @@ class DownsamplingBottleneck(nn.Module):
             nn.Conv2d(
                 internal_channels,
                 internal_channels,
-                kernel_size=kernel_size,
+                kernel_size=3,
                 stride=1,
-                padding=padding,
+                padding=1,
                 bias=bias), nn.BatchNorm2d(internal_channels), activation)
 
         # 1x1 expansion convolution
@@ -386,11 +372,6 @@ class UpsamplingBottleneck(nn.Module):
      used to compute the number of channels after the projection. eg. given
      ``in_channels`` equal to 128 and ``internal_ratio`` equal to 2 the number
      of channels after the projection is 64. Default: 4.
-    - kernel_size (int, optional): the kernel size of the filters used in the
-    convolution layer described above in item 2 of the extension branch.
-    Default: 3.
-    - padding (int, optional): zero-padding added to both sides of the input.
-    Default: 0.
     - dropout_prob (float, optional): probability of an element to be zeroed.
     Default: 0 (no dropout).
     - bias (bool, optional): Adds a learnable bias to the output if ``True``.
@@ -404,8 +385,6 @@ class UpsamplingBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  internal_ratio=4,
-                 kernel_size=3,
-                 padding=0,
                  dropout_prob=0,
                  bias=False,
                  relu=True):
@@ -445,18 +424,17 @@ class UpsamplingBottleneck(nn.Module):
             nn.BatchNorm2d(internal_channels), activation)
 
         # Transposed convolution
-        self.ext_conv2 = nn.Sequential(
-            nn.ConvTranspose2d(
-                internal_channels,
-                internal_channels,
-                kernel_size=kernel_size,
-                stride=2,
-                padding=padding,
-                output_padding=1,
-                bias=bias), nn.BatchNorm2d(internal_channels), activation)
+        self.ext_tconv1 = nn.ConvTranspose2d(
+            internal_channels,
+            internal_channels,
+            kernel_size=2,
+            stride=2,
+            bias=bias)
+        self.ext_tconv1_bnorm = nn.BatchNorm2d(internal_channels)
+        self.ext_tconv1_activation = activation
 
         # 1x1 expansion convolution
-        self.ext_conv3 = nn.Sequential(
+        self.ext_conv2 = nn.Sequential(
             nn.Conv2d(
                 internal_channels, out_channels, kernel_size=1, bias=bias),
             nn.BatchNorm2d(out_channels), activation)
@@ -466,14 +444,18 @@ class UpsamplingBottleneck(nn.Module):
         # PReLU layer to apply after concatenating the branches
         self.out_prelu = activation
 
-    def forward(self, x, max_indices):
+    def forward(self, x, max_indices, output_size):
         # Main branch shortcut
         main = self.main_conv1(x)
-        main = self.main_unpool1(main, max_indices)
+        main = self.main_unpool1(
+            main, max_indices, output_size=output_size)
+
         # Extension branch
         ext = self.ext_conv1(x)
+        ext = self.ext_tconv1(ext, output_size=output_size)
+        ext = self.ext_tconv1_bnorm(ext)
+        ext = self.ext_tconv1_activation(ext)
         ext = self.ext_conv2(ext)
-        ext = self.ext_conv3(ext)
         ext = self.ext_regul(ext)
 
         # Add main and extension branches
@@ -499,13 +481,12 @@ class ENet(nn.Module):
     def __init__(self, num_classes, encoder_relu=False, decoder_relu=True):
         super().__init__()
 
-        self.initial_block = InitialBlock(3, 16, padding=1, relu=encoder_relu)
+        self.initial_block = InitialBlock(3, 16, relu=encoder_relu)
 
         # Stage 1 - Encoder
         self.downsample1_0 = DownsamplingBottleneck(
             16,
             64,
-            padding=1,
             return_indices=True,
             dropout_prob=0.01,
             relu=encoder_relu)
@@ -522,7 +503,6 @@ class ENet(nn.Module):
         self.downsample2_0 = DownsamplingBottleneck(
             64,
             128,
-            padding=1,
             return_indices=True,
             dropout_prob=0.1,
             relu=encoder_relu)
@@ -583,7 +563,7 @@ class ENet(nn.Module):
 
         # Stage 4 - Decoder
         self.upsample4_0 = UpsamplingBottleneck(
-            128, 64, padding=1, dropout_prob=0.1, relu=decoder_relu)
+            128, 64, dropout_prob=0.1, relu=decoder_relu)
         self.regular4_1 = RegularBottleneck(
             64, padding=1, dropout_prob=0.1, relu=decoder_relu)
         self.regular4_2 = RegularBottleneck(
@@ -591,7 +571,7 @@ class ENet(nn.Module):
 
         # Stage 5 - Decoder
         self.upsample5_0 = UpsamplingBottleneck(
-            64, 16, padding=1, dropout_prob=0.1, relu=decoder_relu)
+            64, 16, dropout_prob=0.1, relu=decoder_relu)
         self.regular5_1 = RegularBottleneck(
             16, padding=1, dropout_prob=0.1, relu=decoder_relu)
         self.transposed_conv = nn.ConvTranspose2d(
@@ -600,14 +580,15 @@ class ENet(nn.Module):
             kernel_size=3,
             stride=2,
             padding=1,
-            output_padding=1,
             bias=False)
 
     def forward(self, x):
         # Initial block
+        input_size = x.size()
         x = self.initial_block(x)
 
         # Stage 1 - Encoder
+        stage1_input_size = x.size()
         x, max_indices1_0 = self.downsample1_0(x)
         x = self.regular1_1(x)
         x = self.regular1_2(x)
@@ -615,6 +596,7 @@ class ENet(nn.Module):
         x = self.regular1_4(x)
 
         # Stage 2 - Encoder
+        stage2_input_size = x.size()
         x, max_indices2_0 = self.downsample2_0(x)
         x = self.regular2_1(x)
         x = self.dilated2_2(x)
@@ -636,13 +618,13 @@ class ENet(nn.Module):
         x = self.dilated3_7(x)
 
         # Stage 4 - Decoder
-        x = self.upsample4_0(x, max_indices2_0)
+        x = self.upsample4_0(x, max_indices2_0, output_size=stage2_input_size)
         x = self.regular4_1(x)
         x = self.regular4_2(x)
 
         # Stage 5 - Decoder
-        x = self.upsample5_0(x, max_indices1_0)
+        x = self.upsample5_0(x, max_indices1_0, output_size=stage1_input_size)
         x = self.regular5_1(x)
-        x = self.transposed_conv(x)
+        x = self.transposed_conv(x, output_size=input_size)
 
         return x
