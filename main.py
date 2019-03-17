@@ -7,6 +7,8 @@ import torch.optim.lr_scheduler as lr_scheduler
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
+from PIL import Image
+
 import transforms as ext_transforms
 from models.enet import ENet
 from train import Train
@@ -34,7 +36,7 @@ def load_dataset(dataset):
          transforms.ToTensor()])
 
     label_transform = transforms.Compose([
-        transforms.Resize((args.height, args.width)),
+        transforms.Resize((args.height, args.width), Image.NEAREST),
         ext_transforms.PILToLongTensor()
     ])
 
