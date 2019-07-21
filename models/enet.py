@@ -36,9 +36,9 @@ class InitialBlock(nn.Module):
         super().__init__()
 
         if relu:
-            activation = nn.ReLU()
+            activation = nn.ReLU
         else:
-            activation = nn.PReLU()
+            activation = nn.PReLU
 
         # Main branch - As stated above the number of output channels for this
         # branch is the total minus 3, since the remaining channels come from
@@ -58,7 +58,7 @@ class InitialBlock(nn.Module):
         self.batch_norm = nn.BatchNorm2d(out_channels)
 
         # PReLU layer to apply after concatenating the branches
-        self.out_prelu = activation
+        self.out_activation = activation()
 
     def forward(self, x):
         main = self.main_branch(x)
@@ -70,7 +70,7 @@ class InitialBlock(nn.Module):
         # Apply batch normalization
         out = self.batch_norm(out)
 
-        return self.out_prelu(out)
+        return self.out_activation(out)
 
 
 class RegularBottleneck(nn.Module):
@@ -133,9 +133,9 @@ class RegularBottleneck(nn.Module):
         internal_channels = channels // internal_ratio
 
         if relu:
-            activation = nn.ReLU()
+            activation = nn.ReLU
         else:
-            activation = nn.PReLU()
+            activation = nn.PReLU
 
         # Main branch - shortcut connection
 
@@ -150,7 +150,7 @@ class RegularBottleneck(nn.Module):
                 internal_channels,
                 kernel_size=1,
                 stride=1,
-                bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                bias=bias), nn.BatchNorm2d(internal_channels), activation())
 
         # If the convolution is asymmetric we split the main convolution in
         # two. Eg. for a 5x5 asymmetric convolution we have two convolution:
@@ -164,7 +164,7 @@ class RegularBottleneck(nn.Module):
                     stride=1,
                     padding=(padding, 0),
                     dilation=dilation,
-                    bias=bias), nn.BatchNorm2d(internal_channels), activation,
+                    bias=bias), nn.BatchNorm2d(internal_channels), activation(),
                 nn.Conv2d(
                     internal_channels,
                     internal_channels,
@@ -172,7 +172,7 @@ class RegularBottleneck(nn.Module):
                     stride=1,
                     padding=(0, padding),
                     dilation=dilation,
-                    bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                    bias=bias), nn.BatchNorm2d(internal_channels), activation())
         else:
             self.ext_conv2 = nn.Sequential(
                 nn.Conv2d(
@@ -182,7 +182,7 @@ class RegularBottleneck(nn.Module):
                     stride=1,
                     padding=padding,
                     dilation=dilation,
-                    bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                    bias=bias), nn.BatchNorm2d(internal_channels), activation())
 
         # 1x1 expansion convolution
         self.ext_conv3 = nn.Sequential(
@@ -191,12 +191,12 @@ class RegularBottleneck(nn.Module):
                 channels,
                 kernel_size=1,
                 stride=1,
-                bias=bias), nn.BatchNorm2d(channels), activation)
+                bias=bias), nn.BatchNorm2d(channels), activation())
 
         self.ext_regul = nn.Dropout2d(p=dropout_prob)
 
         # PReLU layer to apply after adding the branches
-        self.out_prelu = activation
+        self.out_activation = activation()
 
     def forward(self, x):
         # Main branch shortcut
@@ -211,7 +211,7 @@ class RegularBottleneck(nn.Module):
         # Add main and extension branches
         out = main + ext
 
-        return self.out_prelu(out)
+        return self.out_activation(out)
 
 
 class DownsamplingBottleneck(nn.Module):
@@ -281,9 +281,9 @@ class DownsamplingBottleneck(nn.Module):
         internal_channels = in_channels // internal_ratio
 
         if relu:
-            activation = nn.ReLU()
+            activation = nn.ReLU
         else:
-            activation = nn.PReLU()
+            activation = nn.PReLU
 
         # Main branch - max pooling followed by feature map (channels) padding
         self.main_max1 = nn.MaxPool2d(
@@ -303,7 +303,7 @@ class DownsamplingBottleneck(nn.Module):
                 internal_channels,
                 kernel_size=2,
                 stride=2,
-                bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                bias=bias), nn.BatchNorm2d(internal_channels), activation())
 
         # Convolution
         self.ext_conv2 = nn.Sequential(
@@ -313,7 +313,7 @@ class DownsamplingBottleneck(nn.Module):
                 kernel_size=kernel_size,
                 stride=1,
                 padding=padding,
-                bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                bias=bias), nn.BatchNorm2d(internal_channels), activation())
 
         # 1x1 expansion convolution
         self.ext_conv3 = nn.Sequential(
@@ -322,12 +322,12 @@ class DownsamplingBottleneck(nn.Module):
                 out_channels,
                 kernel_size=1,
                 stride=1,
-                bias=bias), nn.BatchNorm2d(out_channels), activation)
+                bias=bias), nn.BatchNorm2d(out_channels), activation())
 
         self.ext_regul = nn.Dropout2d(p=dropout_prob)
 
         # PReLU layer to apply after concatenating the branches
-        self.out_prelu = activation
+        self.out_activation = activation()
 
     def forward(self, x):
         # Main branch shortcut
@@ -358,7 +358,7 @@ class DownsamplingBottleneck(nn.Module):
         # Add main and extension branches
         out = main + ext
 
-        return self.out_prelu(out), max_indices
+        return self.out_activation(out), max_indices
 
 
 class UpsamplingBottleneck(nn.Module):
@@ -421,9 +421,9 @@ class UpsamplingBottleneck(nn.Module):
         internal_channels = in_channels // internal_ratio
 
         if relu:
-            activation = nn.ReLU()
+            activation = nn.ReLU
         else:
-            activation = nn.PReLU()
+            activation = nn.PReLU
 
         # Main branch - max pooling followed by feature map (channels) padding
         self.main_conv1 = nn.Sequential(
@@ -442,7 +442,7 @@ class UpsamplingBottleneck(nn.Module):
         self.ext_conv1 = nn.Sequential(
             nn.Conv2d(
                 in_channels, internal_channels, kernel_size=1, bias=bias),
-            nn.BatchNorm2d(internal_channels), activation)
+            nn.BatchNorm2d(internal_channels), activation())
 
         # Transposed convolution
         self.ext_conv2 = nn.Sequential(
@@ -453,18 +453,18 @@ class UpsamplingBottleneck(nn.Module):
                 stride=2,
                 padding=padding,
                 output_padding=1,
-                bias=bias), nn.BatchNorm2d(internal_channels), activation)
+                bias=bias), nn.BatchNorm2d(internal_channels), activation())
 
         # 1x1 expansion convolution
         self.ext_conv3 = nn.Sequential(
             nn.Conv2d(
                 internal_channels, out_channels, kernel_size=1, bias=bias),
-            nn.BatchNorm2d(out_channels), activation)
+            nn.BatchNorm2d(out_channels), activation())
 
         self.ext_regul = nn.Dropout2d(p=dropout_prob)
 
         # PReLU layer to apply after concatenating the branches
-        self.out_prelu = activation
+        self.out_activation = activation()
 
     def forward(self, x, max_indices):
         # Main branch shortcut
@@ -479,7 +479,7 @@ class UpsamplingBottleneck(nn.Module):
         # Add main and extension branches
         out = main + ext
 
-        return self.out_prelu(out)
+        return self.out_activation(out)
 
 
 class ENet(nn.Module):
