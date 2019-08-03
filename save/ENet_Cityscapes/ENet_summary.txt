@@ -6,14 +6,14 @@ device: cuda
 epochs: 300
 height: 512
 ignore_unlabeled: True
-imshow_batch: True
+imshow_batch: False
 learning_rate: 0.0005
 lr_decay: 0.1
 lr_decay_epochs: 100
 mode: train
 name: ENet
 print_step: False
-resume: False
+resume: True
 save_dir: save
 weighing: ENet
 weight_decay: 0.0002
@@ -21,5 +21,5 @@ width: 1024
 workers: 4
 
 BEST VALIDATION
-Epoch: 220
-Mean IoU: 0.59403805134811
+Epoch: 300
+Mean IoU: 0.6093590117546754
