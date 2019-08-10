@@ -7,7 +7,7 @@ This implementation has been tested on the CamVid and Cityscapes datasets. Curre
 
 |                               Dataset                                | Classes <sup>1</sup> | Input resolution | Batch size | Epochs |   Mean IoU (%)    | GPU memory (GiB) | Training time (hours)<sup>2</sup> |
 | :------------------------------------------------------------------: | :------------------: | :--------------: | :--------: | :----: | :---------------: | :--------------: | :-------------------------------: |
-| [CamVid](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/) |          11          |     480x360      |     10     |  300   | 53.12<sup>3</sup> |       4.2        |                 1                 |
+| [CamVid](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/) |          11          |     480x360      |     10     |  300   | 52.85<sup>3</sup> |       4.2        |                 1                 |
 |          [Cityscapes](https://www.cityscapes-dataset.com/)           |          19          |     1024x512     |     4      |  300   | 60.94<sup>4</sup> |       5.4        |                24                 |
 
 <sup>1</sup> When referring to the number of classes, the void/unlabeled class is always excluded.<br/>
