@@ -300,12 +300,12 @@ if __name__ == '__main__':
 
     if args.mode.lower() in {'train', 'full'}:
         model = train(train_loader, val_loader, w_class, class_encoding)
-        if args.mode.lower() == 'full':
-            test(model, test_loader, w_class, class_encoding)
-    elif args.mode.lower() == 'test':
-        # Intialize a new ENet model
-        num_classes = len(class_encoding)
-        model = ENet(num_classes).to(device)
+
+    if args.mode.lower() in {'test', 'full'}:
+        if args.mode.lower() == 'test':
+            # Intialize a new ENet model
+            num_classes = len(class_encoding)
+            model = ENet(num_classes).to(device)
 
         # Initialize a optimizer just so we can retrieve the model from the
         # checkpoint
@@ -314,10 +314,8 @@ if __name__ == '__main__':
         # Load the previoulsy saved model state to the ENet model
         model = utils.load_checkpoint(model, optimizer, args.save_dir,
                                       args.name)[0]
-        print(model)
+
+        if args.mode.lower() == 'test':
+            print(model)
+
         test(model, test_loader, w_class, class_encoding)
-    else:
-        # Should never happen...but just in case it does
-        raise RuntimeError(
-            "\"{0}\" is not a valid choice for execution mode.".format(
-                args.mode))
