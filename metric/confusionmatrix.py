@@ -19,7 +19,7 @@ class ConfusionMatrix(metric.Metric):
     def __init__(self, num_classes, normalized=False):
         super().__init__()
 
-        self.conf = np.ndarray((num_classes, num_classes), dtype=np.int32)
+        self.conf = np.ndarray((num_classes, num_classes), dtype=np.int64)
         self.normalized = normalized
         self.num_classes = num_classes
         self.reset()
