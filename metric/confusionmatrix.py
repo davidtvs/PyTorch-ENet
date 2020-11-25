@@ -19,7 +19,7 @@ class ConfusionMatrix(metric.Metric):
     def __init__(self, num_classes, normalized=False):
         super().__init__()
 
-        self.conf = np.ndarray((num_classes, num_classes), dtype=np.int32)
+        self.conf = np.ndarray((num_classes, num_classes), dtype=np.int64)
         self.normalized = normalized
         self.num_classes = num_classes
         self.reset()
@@ -74,7 +74,7 @@ class ConfusionMatrix(metric.Metric):
         # hack for bincounting 2 arrays together
         x = predicted + self.num_classes * target
         bincount_2d = np.bincount(
-            x.astype(np.int32), minlength=self.num_classes**2)
+            x.astype(np.int64), minlength=self.num_classes**2)
         assert bincount_2d.size == self.num_classes**2
         conf = bincount_2d.reshape((self.num_classes, self.num_classes))
 
