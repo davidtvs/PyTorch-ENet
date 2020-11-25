@@ -74,7 +74,7 @@ class ConfusionMatrix(metric.Metric):
         # hack for bincounting 2 arrays together
         x = predicted + self.num_classes * target
         bincount_2d = np.bincount(
-            x.astype(np.int32), minlength=self.num_classes**2)
+            x.astype(np.int64), minlength=self.num_classes**2)
         assert bincount_2d.size == self.num_classes**2
         conf = bincount_2d.reshape((self.num_classes, self.num_classes))
 
