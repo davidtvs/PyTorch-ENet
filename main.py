@@ -36,7 +36,7 @@ def load_dataset(dataset):
          transforms.ToTensor()])
 
     label_transform = transforms.Compose([
-        transforms.Resize((args.height, args.width), Image.NEAREST),
+        transforms.Resize((args.height, args.width), transforms.InterpolationMode.NEAREST),
         ext_transforms.PILToLongTensor()
     ])
 
@@ -185,8 +185,8 @@ def train(train_loader, val_loader, class_weights, class_encoding):
     for epoch in range(start_epoch, args.epochs):
         print(">>>> [Epoch: {0:d}] Training".format(epoch))
 
-        lr_updater.step()
         epoch_loss, (iou, miou) = train.run_epoch(args.print_step)
+        lr_updater.step()
 
         print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
               format(epoch, epoch_loss, miou))
