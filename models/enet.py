@@ -437,7 +437,7 @@ class UpsamplingBottleneck(nn.Module):
         self.ext_conv2 = nn.Sequential(
             nn.Conv2d(
                 internal_channels, out_channels, kernel_size=1, bias=bias),
-            nn.BatchNorm2d(out_channels), activation())
+            nn.BatchNorm2d(out_channels))
 
         self.ext_regul = nn.Dropout2d(p=dropout_prob)
 

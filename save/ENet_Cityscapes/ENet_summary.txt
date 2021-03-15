@@ -1,7 +1,7 @@
 ARGUMENTS
 batch_size: 4
 dataset: cityscapes
-dataset_dir: ../../Datasets/Cityscapes/1024x512/
+dataset_dir: ../Datasets/Cityscapes/1024x512/
 device: cuda
 epochs: 300
 height: 512
@@ -13,13 +13,13 @@ lr_decay_epochs: 100
 mode: train
 name: ENet
 print_step: False
-resume: True
-save_dir: save
+resume: False
+save_dir: save/new_cityscapes/
 weighing: ENet
 weight_decay: 0.0002
 width: 1024
 workers: 4
 
 BEST VALIDATION
-Epoch: 270
-Mean IoU: 0.6007430952025391
+Epoch: 230
+Mean IoU: 0.5921075030966009

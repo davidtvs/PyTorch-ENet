@@ -14,12 +14,12 @@ def get_arguments():
         choices=['train', 'test', 'full'],
         default='train',
         help=("train: performs training and validation; test: tests the model "
-              "found in \"--save_dir\" with name \"--name\" on \"--dataset\"; "
+              "found in \"--save-dir\" with name \"--name\" on \"--dataset\"; "
               "full: combines train and test modes. Default: train"))
     parser.add_argument(
         "--resume",
         action='store_true',
-        help=("The model found in \"--checkpoint_dir/--name/\" and filename "
+        help=("The model found in \"--save-dir/--name/\" and filename "
               "\"--name.h5\" is loaded."))
 
     # Hyperparameters

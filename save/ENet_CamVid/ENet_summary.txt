@@ -1,7 +1,7 @@
 ARGUMENTS
 batch_size: 10
 dataset: camvid
-dataset_dir: ../../Datasets/CamVid/
+dataset_dir: ../Datasets/CamVid/
 device: cuda
 epochs: 300
 height: 360
@@ -14,12 +14,12 @@ mode: full
 name: ENet
 print_step: False
 resume: False
-save_dir: save
+save_dir: save/new_camvid/
 weighing: ENet
 weight_decay: 0.0002
 width: 480
 workers: 4
 
 BEST VALIDATION
-Epoch: 160
-Mean IoU: 0.6594434304927109
+Epoch: 260
+Mean IoU: 0.6407776379897647
