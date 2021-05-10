@@ -36,7 +36,7 @@ def load_dataset(dataset):
          transforms.ToTensor()])
 
     label_transform = transforms.Compose([
-        transforms.Resize((args.height, args.width), transforms.InterpolationMode.NEAREST),
+        transforms.Resize((args.height, args.width), Image.NEAREST),
         ext_transforms.PILToLongTensor()
     ])
 

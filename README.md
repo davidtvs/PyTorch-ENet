@@ -16,10 +16,16 @@ This implementation has been tested on the CamVid and Cityscapes datasets. Curre
 
 ## Installation
 
-1. Python 3 and pip.
-2. Set up a virtual environment (optional, but recommended).
-3. Install dependencies using pip: ``pip install -r requirements.txt``.
+### Local pip
 
+1. Python 3 and pip
+2. Set up a virtual environment (optional, but recommended)
+3. Install dependencies using pip: `pip install -r requirements.txt`
+
+### Docker image
+
+1. Build the image: `docker build -t enet .`
+2. Run: `docker run -it --gpus all --ipc host enet`
 
 ## Usage
 
